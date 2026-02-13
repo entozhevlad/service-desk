@@ -37,8 +37,6 @@ Mini Service Desk — fullstack-приложение, состоящее из ba
 ### Frontend
 
 - Vue 3
-- Vue Router
-- Axios
 
 ### Инфраструктура
 
@@ -65,7 +63,7 @@ Mini Service Desk — fullstack-приложение, состоящее из ba
 
 ### Создание тикета
 
-    POST /tickets
+    POST /ticket
 
 ### Получение списка тикетов
 
