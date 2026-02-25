@@ -19,6 +19,7 @@ async def create_ticket(
     payload: TicketCreate,
     service_desk: ServiceDesk = Depends(get_service_desk),
 ) -> Ticket:
+    """Создает тикет."""
     return await service_desk.create_ticket(description=payload.description)
 
 
@@ -27,6 +28,7 @@ async def get_ticket(
     ticket_id: UUID,
     service_desk: ServiceDesk = Depends(get_service_desk),
 ) -> Ticket:
+    """Возвращает тикет по идентификатору."""
     ticket = await service_desk.get_ticket(ticket_id)
     if ticket is None:
         raise HTTPException(
@@ -42,6 +44,7 @@ async def update_ticket(
     payload: TicketUpdate,
     service_desk: ServiceDesk = Depends(get_service_desk),
 ) -> Ticket:
+    """Обновляет тикет по идентификатору."""
     ticket = await service_desk.update_ticket(ticket_id, payload.description)
     if ticket is None:
         raise HTTPException(
@@ -55,6 +58,7 @@ async def update_ticket(
 async def list_tickets(
     service_desk: ServiceDesk = Depends(get_service_desk),
 ) -> list[Ticket]:
+    """Возвращает список тикетов."""
     return await service_desk.list_tickets()
 
 
@@ -63,6 +67,7 @@ async def delete_ticket(
     ticket_id: UUID,
     service_desk: ServiceDesk = Depends(get_service_desk),
 ) -> TicketDeleted:
+    """Удаляет тикет по идентификатору."""
     deleted = await service_desk.delete_ticket(ticket_id)
     if not deleted:
         raise HTTPException(

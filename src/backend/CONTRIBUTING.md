@@ -12,6 +12,11 @@ cd src/backend
 uv sync
 ```
 
+## Поднять БД в Docker
+```bash
+docker compose --env-file .env.local up -d db
+```
+
 ## Миграции
 ```bash
 cd src/backend
@@ -23,6 +28,12 @@ uv run alembic upgrade head
 ```bash
 cd src/backend
 uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+## Тесты
+```bash
+cd src/backend
+uv run pytest
 ```
 
 ## Линтеры
