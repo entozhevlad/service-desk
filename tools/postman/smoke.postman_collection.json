@@ -75,6 +75,36 @@
       ]
     },
     {
+      "name": "List tickets",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/tickets",
+          "host": ["{{baseUrl}}"],
+          "path": ["tickets"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"contains created ticket\", function () {",
+              "  var jsonData = pm.response.json();",
+              "  var ids = jsonData.map(function (item) { return item.id; });",
+              "  pm.expect(ids).to.include(pm.environment.get(\"ticketId\"));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
       "name": "Get ticket by id",
       "request": {
         "method": "GET",

@@ -104,3 +104,24 @@ async def test_update_ticket_updates_description(mock_session: Mock) -> None:
     assert updated.description == "new"
     assert ticket_model.description == "new"
     mock_session.commit.assert_awaited_once()
+
+
+async def test_list_tickets_returns_models(mock_session: Mock) -> None:
+    ticket_one = TicketModel()
+    ticket_one.id = uuid.uuid4()
+    ticket_one.created_at = datetime.now(timezone.utc)
+    ticket_one.description = "first"
+
+    ticket_two = TicketModel()
+    ticket_two.id = uuid.uuid4()
+    ticket_two.created_at = datetime.now(timezone.utc)
+    ticket_two.description = "second"
+
+    result = Mock()
+    result.scalars.return_value.all.return_value = [ticket_one, ticket_two]
+    mock_session.execute = AsyncMock(return_value=result)
+
+    service = ServiceDesk(mock_session)
+    tickets = await service.list_tickets()
+
+    assert [ticket.id for ticket in tickets] == [ticket_one.id, ticket_two.id]

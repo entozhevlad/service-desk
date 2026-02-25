@@ -60,3 +60,23 @@ async def test_update_ticket_description(client: AsyncClient, db_session: object
         {"id": uuid.UUID(data["id"])},
     )
     await db_session.commit()
+
+
+async def test_list_tickets(client: AsyncClient, db_session: object) -> None:
+    service = ServiceDesk(db_session)
+    ticket_one = await service.create_ticket(description="one")
+    ticket_two = await service.create_ticket(description="two")
+
+    response = await client.get("/tickets")
+
+    assert response.status_code == 200
+    data = response.json()
+    ids = [item["id"] for item in data]
+    assert str(ticket_one.id) in ids
+    assert str(ticket_two.id) in ids
+
+    await db_session.execute(
+        text("DELETE FROM tickets WHERE id = :id1 OR id = :id2"),
+        {"id1": ticket_one.id, "id2": ticket_two.id},
+    )
+    await db_session.commit()
