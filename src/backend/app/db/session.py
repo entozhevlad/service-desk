@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import (AsyncEngine, AsyncSession,
 
 
 def _get_database_url() -> str:
+    """Возвращает DSN для подключения к БД."""
     dsn = os.getenv("DATABASE_URL")
     if dsn:
         return dsn
@@ -17,7 +18,9 @@ def _get_database_url() -> str:
     port = os.getenv("POSTGRES_PORT", "5432")
 
     if user and password and database:
-        return f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{database}"
+        return (
+            f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{database}"
+        )
 
     raise RuntimeError("DATABASE_URL (or POSTGRES_* vars) is not set")
 
@@ -27,6 +30,7 @@ _session_factory: async_sessionmaker[AsyncSession] | None = None
 
 
 def get_engine() -> AsyncEngine:
+    """Возвращает singleton-движок БД."""
     global _engine
     if _engine is None:
         _engine = create_async_engine(_get_database_url(), pool_pre_ping=True)
@@ -34,13 +38,18 @@ def get_engine() -> AsyncEngine:
 
 
 def get_session_factory() -> async_sessionmaker[AsyncSession]:
+    """Возвращает фабрику сессий БД."""
     global _session_factory
     if _session_factory is None:
-        _session_factory = async_sessionmaker(get_engine(), expire_on_commit=False)
+        _session_factory = async_sessionmaker(
+            get_engine(),
+            expire_on_commit=False,
+        )
     return _session_factory
 
 
 async def get_session() -> AsyncIterator[AsyncSession]:
+    """Создает сессию БД для запроса."""
     session_factory = get_session_factory()
     async with session_factory() as session:
         yield session
