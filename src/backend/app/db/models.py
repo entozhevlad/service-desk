@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, Uuid, func
+from sqlalchemy import DateTime, Text, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -16,4 +16,10 @@ class Ticket(Base):
         nullable=False,
         default=lambda: datetime.now(timezone.utc),
         server_default=func.now(),
+    )
+    description: Mapped[str] = mapped_column(
+        Text(),
+        nullable=False,
+        default="",
+        server_default="",
     )
