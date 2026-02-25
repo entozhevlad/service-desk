@@ -38,7 +38,11 @@ class ServiceDesk:
         await self._session.commit()
         return True
 
-    async def update_ticket(self, ticket_id: UUID, description: str) -> Ticket | None:
+    async def update_ticket(
+        self,
+        ticket_id: UUID,
+        description: str,
+    ) -> Ticket | None:
         result = await self._session.execute(
             select(TicketModel).where(TicketModel.id == ticket_id)
         )

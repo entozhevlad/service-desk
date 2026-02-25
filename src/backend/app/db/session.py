@@ -1,8 +1,12 @@
 import os
 from collections.abc import AsyncIterator
 
-from sqlalchemy.ext.asyncio import (AsyncEngine, AsyncSession,
-                                    async_sessionmaker, create_async_engine)
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 
 def _get_database_url() -> str:
@@ -17,7 +21,9 @@ def _get_database_url() -> str:
     port = os.getenv("POSTGRES_PORT", "5432")
 
     if user and password and database:
-        return f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{database}"
+        return (
+            f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{database}"
+        )
 
     raise RuntimeError("DATABASE_URL (or POSTGRES_* vars) is not set")
 
@@ -36,7 +42,10 @@ def get_engine() -> AsyncEngine:
 def get_session_factory() -> async_sessionmaker[AsyncSession]:
     global _session_factory
     if _session_factory is None:
-        _session_factory = async_sessionmaker(get_engine(), expire_on_commit=False)
+        _session_factory = async_sessionmaker(
+            get_engine(),
+            expire_on_commit=False,
+        )
     return _session_factory
 
 
