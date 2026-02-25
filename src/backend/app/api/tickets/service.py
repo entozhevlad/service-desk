@@ -26,3 +26,14 @@ class ServiceDesk:
         if ticket is None:
             return None
         return Ticket.model_validate(ticket)
+
+    async def delete_ticket(self, ticket_id: UUID) -> bool:
+        result = await self._session.execute(
+            select(TicketModel).where(TicketModel.id == ticket_id)
+        )
+        ticket = result.scalar_one_or_none()
+        if ticket is None:
+            return False
+        await self._session.delete(ticket)
+        await self._session.commit()
+        return True
