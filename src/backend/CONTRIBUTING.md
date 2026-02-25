@@ -2,7 +2,7 @@
 
 ## Как получить проект
 ```bash
-git clone <repo-url>
+git clone https://github.com/entozhevlad/service-desk.git
 cd service-desk
 ```
 
