@@ -24,10 +24,9 @@ services:
       dockerfile: Dockerfile
     container_name: service-desk-backend
     environment:
-      # ✅ asyncpg driver
       DATABASE_URL: "postgresql+asyncpg://${POSTGRES_USER:-service_desk}:${POSTGRES_PASSWORD:-service_desk}@db:5432/${POSTGRES_DB:-service_desk}"
       APP_ENV: ${APP_ENV:-dev}
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:8081}
     depends_on:
       db:
         condition: service_healthy
@@ -38,6 +37,18 @@ services:
       - ./src/backend/pyproject.toml:/app/pyproject.toml
       - ./src/backend/uv.lock:/app/uv.lock
     command: ["uv", "run", "uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+
+  frontend:
+    build:
+      context: ./src/frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /api
+    container_name: service-desk-frontend
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-8081}:80"
 
 volumes:
   pgdata:
