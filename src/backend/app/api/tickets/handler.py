@@ -3,7 +3,8 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.tickets.schemas import Ticket, TicketCreate, TicketDeleted, TicketUpdate
+from app.api.tickets.schemas import (Ticket, TicketCreate, TicketDeleted,
+                                     TicketUpdate)
 from app.api.tickets.service import ServiceDesk
 from app.db.session import get_session
 
