@@ -6,6 +6,11 @@ git clone <repo-url>
 cd service-desk
 ```
 
+## Установить uv
+```bash
+curl -Ls https://astral.sh/uv/install.sh | sh
+```
+
 ## Установить зависимости
 ```bash
 cd src/backend
