@@ -49,3 +49,10 @@ class ServiceDesk:
         await self._session.commit()
         await self._session.refresh(ticket)
         return Ticket.model_validate(ticket)
+
+    async def list_tickets(self) -> list[Ticket]:
+        result = await self._session.execute(
+            select(TicketModel).order_by(TicketModel.created_at.desc())
+        )
+        tickets = result.scalars().all()
+        return [Ticket.model_validate(ticket) for ticket in tickets]

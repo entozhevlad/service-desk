@@ -45,6 +45,12 @@ async def update_ticket(
     return ticket
 
 
+@tickets_router.get("/tickets", response_model=list[Ticket])
+async def list_tickets(session: AsyncSession = Depends(get_session)) -> list[Ticket]:
+    service_desk = ServiceDesk(session)
+    return await service_desk.list_tickets()
+
+
 @tickets_router.delete("/tickets/{ticket_id}", response_model=TicketDeleted)
 async def delete_ticket(
     ticket_id: UUID,

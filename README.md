@@ -121,21 +121,28 @@ Frontend будет реализован как одностраничное п�
 
     service-desk/
     │
-    ├── backend/
-    │   ├── app/
-    │   │   ├── db/
-    │   │   ├── tickets/
-    │   │   ├── schemas/
-    │   │   ├── config.py
-    │   │   └── main.py
-    │   └── tests/
+    ├── src/
+    │   └── backend/
+    │       ├── app/
+    │       │   ├── api/
+    │       │   │   ├── healthz/
+    │       │   │   └── tickets/
+    │       │   ├── db/
+    │       │   │   ├── migrations/
+    │       │   │   ├── base.py
+    │       │   │   ├── models.py
+    │       │   │   └── session.py
+    │       │   ├── main.py
+    │       │   ├── routers.py
+    │       │   └── service.py
+    │       ├── tests/
+    │       │   ├── integrations/
+    │       │   └── unit/
+    │       ├── alembic.ini
+    │       └── pyproject.toml
     │
-    ├── frontend/
-    │   ├── src/
-    │   │   ├── api/
-    │   │   ├── components/
-    │   │   ├── views/
-    │   │   └── router/
-    │   └── tests/
+    ├── tools/
+    │   └── postman/
+    │       └── smoke.postman_collection.json
     │
-    └── docker-compose.yml
+    └── docker-compose.yaml
