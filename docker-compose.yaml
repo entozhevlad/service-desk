@@ -1,0 +1,43 @@
+name: service-desk
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: service-desk-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-service_desk}
+      POSTGRES_USER: ${POSTGRES_USER:-service_desk}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-service_desk}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build:
+      context: ./src/backend
+      dockerfile: Dockerfile
+    container_name: service-desk-backend
+    environment:
+      # ✅ asyncpg driver
+      DATABASE_URL: "postgresql+asyncpg://${POSTGRES_USER:-service_desk}:${POSTGRES_PASSWORD:-service_desk}@db:5432/${POSTGRES_DB:-service_desk}"
+      APP_ENV: ${APP_ENV:-dev}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./src/backend/app:/app/app
+      - ./src/backend/pyproject.toml:/app/pyproject.toml
+      - ./src/backend/uv.lock:/app/uv.lock
+    command: ["uv", "run", "uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+
+volumes:
+  pgdata:
