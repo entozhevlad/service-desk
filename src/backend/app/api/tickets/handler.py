@@ -3,7 +3,12 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.tickets.dependencies import get_service_desk
-from app.api.tickets.schemas import Ticket, TicketCreate, TicketDeleted, TicketUpdate
+from app.api.tickets.schemas import (
+    Ticket,
+    TicketCreate,
+    TicketDeleted,
+    TicketUpdate,
+)
 from app.api.tickets.service import ServiceDesk
 
 tickets_router = APIRouter(tags=["tickets"])
@@ -24,7 +29,10 @@ async def get_ticket(
 ) -> Ticket:
     ticket = await service_desk.get_ticket(ticket_id)
     if ticket is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ticket not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Ticket not found",
+        )
     return ticket
 
 
@@ -36,12 +44,17 @@ async def update_ticket(
 ) -> Ticket:
     ticket = await service_desk.update_ticket(ticket_id, payload.description)
     if ticket is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ticket not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Ticket not found",
+        )
     return ticket
 
 
 @tickets_router.get("/tickets", response_model=list[Ticket])
-async def list_tickets(service_desk: ServiceDesk = Depends(get_service_desk)) -> list[Ticket]:
+async def list_tickets(
+    service_desk: ServiceDesk = Depends(get_service_desk),
+) -> list[Ticket]:
     return await service_desk.list_tickets()
 
 
@@ -52,5 +65,8 @@ async def delete_ticket(
 ) -> TicketDeleted:
     deleted = await service_desk.delete_ticket(ticket_id)
     if not deleted:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ticket not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Ticket not found",
+        )
     return TicketDeleted(id=ticket_id, message="Ticket deleted")

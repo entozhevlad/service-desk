@@ -44,6 +44,9 @@ jobs:
       - name: isort (check)
         run: uv run isort --check-only app
 
+      - name: flake8
+        run: uv run flake8 app
+
       - name: mypy
         run: uv run mypy app
 
