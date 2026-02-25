@@ -8,10 +8,13 @@ from app.db.models import Ticket as TicketModel
 
 
 class ServiceDesk:
+    """Сервисный слой работы с тикетами."""
     def __init__(self, session: AsyncSession) -> None:
+        """Создает сервис с сессией БД."""
         self._session = session
 
     async def create_ticket(self, description: str = "") -> Ticket:
+        """Создает тикет с описанием."""
         ticket = TicketModel(description=description)
         self._session.add(ticket)
         await self._session.commit()
@@ -19,6 +22,7 @@ class ServiceDesk:
         return Ticket.model_validate(ticket)
 
     async def get_ticket(self, ticket_id: UUID) -> Ticket | None:
+        """Возвращает тикет по идентификатору."""
         result = await self._session.execute(
             select(TicketModel).where(TicketModel.id == ticket_id)
         )
@@ -28,6 +32,7 @@ class ServiceDesk:
         return Ticket.model_validate(ticket)
 
     async def delete_ticket(self, ticket_id: UUID) -> bool:
+        """Удаляет тикет по идентификатору."""
         result = await self._session.execute(
             select(TicketModel).where(TicketModel.id == ticket_id)
         )
@@ -38,7 +43,12 @@ class ServiceDesk:
         await self._session.commit()
         return True
 
-    async def update_ticket(self, ticket_id: UUID, description: str) -> Ticket | None:
+    async def update_ticket(
+        self,
+        ticket_id: UUID,
+        description: str,
+    ) -> Ticket | None:
+        """Обновляет описание тикета."""
         result = await self._session.execute(
             select(TicketModel).where(TicketModel.id == ticket_id)
         )
@@ -51,6 +61,7 @@ class ServiceDesk:
         return Ticket.model_validate(ticket)
 
     async def list_tickets(self) -> list[Ticket]:
+        """Возвращает список тикетов."""
         result = await self._session.execute(
             select(TicketModel).order_by(TicketModel.created_at.desc())
         )

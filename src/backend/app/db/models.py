@@ -8,9 +8,14 @@ from app.db.base import Base
 
 
 class Ticket(Base):
+    """ORM модель тикета."""
     __tablename__ = "tickets"
 
-    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid4,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
