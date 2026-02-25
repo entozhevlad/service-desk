@@ -24,7 +24,6 @@ services:
       dockerfile: Dockerfile
     container_name: service-desk-backend
     environment:
-      # ✅ asyncpg driver
       DATABASE_URL: "postgresql+asyncpg://${POSTGRES_USER:-service_desk}:${POSTGRES_PASSWORD:-service_desk}@db:5432/${POSTGRES_DB:-service_desk}"
       APP_ENV: ${APP_ENV:-dev}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
