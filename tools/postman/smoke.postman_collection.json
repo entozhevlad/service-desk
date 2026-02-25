@@ -38,6 +38,15 @@
       "request": {
         "method": "POST",
         "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"printer is broken\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
         "url": {
           "raw": "{{baseUrl}}/ticket",
           "host": ["{{baseUrl}}"],
@@ -57,6 +66,7 @@
               "  var jsonData = pm.response.json();",
               "  pm.expect(jsonData.id).to.exist;",
               "  pm.expect(jsonData.created_at).to.exist;",
+              "  pm.expect(jsonData.description).to.eql(\"printer is broken\");",
               "});",
               "pm.environment.set(\"ticketId\", pm.response.json().id);"
             ]
@@ -87,6 +97,44 @@
               "pm.test(\"id matches\", function () {",
               "  var jsonData = pm.response.json();",
               "  pm.expect(jsonData.id).to.eql(pm.environment.get(\"ticketId\"));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Update ticket",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"printer fixed\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/tickets/{{ticketId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["tickets", "{{ticketId}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"updated description\", function () {",
+              "  var jsonData = pm.response.json();",
+              "  pm.expect(jsonData.description).to.eql(\"printer fixed\");",
               "});"
             ]
           }
