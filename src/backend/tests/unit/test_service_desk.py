@@ -45,3 +45,31 @@ async def test_create_ticket_returns_id_and_timestamp(
     assert isinstance(added_ticket, TicketModel)
     mock_session.commit.assert_awaited_once()
     mock_session.refresh.assert_awaited_once_with(added_ticket)
+
+
+async def test_get_ticket_returns_none_when_missing(mock_session: Mock) -> None:
+    result = Mock()
+    result.scalar_one_or_none.return_value = None
+    mock_session.execute = AsyncMock(return_value=result)
+    service = ServiceDesk(mock_session)
+
+    ticket = await service.get_ticket(uuid.uuid4())
+
+    assert ticket is None
+
+
+async def test_get_ticket_returns_ticket(mock_session: Mock) -> None:
+    ticket_model = TicketModel()
+    ticket_model.id = uuid.uuid4()
+    ticket_model.created_at = datetime.now(timezone.utc)
+
+    result = Mock()
+    result.scalar_one_or_none.return_value = ticket_model
+    mock_session.execute = AsyncMock(return_value=result)
+    service = ServiceDesk(mock_session)
+
+    ticket = await service.get_ticket(ticket_model.id)
+
+    assert ticket is not None
+    assert ticket.id == ticket_model.id
+    assert ticket.created_at == ticket_model.created_at
