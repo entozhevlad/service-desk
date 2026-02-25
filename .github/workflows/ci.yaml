@@ -130,3 +130,12 @@ jobs:
           POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
         run: uv run pytest tests/integrations
+
+  backend-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build -f src/backend/Dockerfile -t service-desk-backend:ci src/backend
