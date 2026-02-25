@@ -7,8 +7,10 @@ from app.db.session import get_engine
 
 
 def create_app(root_message: str = "Welcome") -> FastAPI:
+    """Создает экземпляр приложения FastAPI."""
     @asynccontextmanager
     async def lifespan(_: FastAPI):
+        """Управляет жизненным циклом приложения."""
         yield
         await get_engine().dispose()
 
