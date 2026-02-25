@@ -22,3 +22,4 @@ dependencies = [
 [tool.mypy]
 explicit_package_bases = true
 mypy_path = "."
+files = ["app"]
