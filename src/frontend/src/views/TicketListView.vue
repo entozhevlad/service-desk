@@ -32,10 +32,15 @@ const formAssignee = ref<string>("");
 async function load() {
   loading.value = true;
   error.value = null;
+
   try {
+    // важно: не шлем undefined в query как строку "undefined"
+    const status = statusFilter.value.trim() || undefined;
+    const priority = priorityFilter.value.trim() || undefined;
+
     tickets.value = await listTickets({
-      status: statusFilter.value || undefined,
-      priority: priorityFilter.value || undefined,
+      status,
+      priority,
     });
   } catch (e: any) {
     error.value = e?.message ?? "Failed to load tickets";
@@ -62,6 +67,10 @@ function openEdit(t: Ticket) {
   formPriority.value = t.priority;
   formAssignee.value = t.assignee ?? "";
   formOpen.value = true;
+}
+
+function closeModal() {
+  formOpen.value = false;
 }
 
 async function submit() {
@@ -113,100 +122,185 @@ async function quickStatusUpdate(t: Ticket) {
 onMounted(load);
 
 const filteredHint = computed(() => {
-  const parts = [];
+  const parts: string[] = [];
   if (statusFilter.value) parts.push(`status=${statusFilter.value}`);
   if (priorityFilter.value) parts.push(`priority=${priorityFilter.value}`);
   return parts.length ? parts.join(", ") : "no filters";
 });
+
+const modalTitle = computed(() => (editId.value === null ? "Create ticket" : "Edit ticket"));
 </script>
 
 <template>
-  <main style="max-width: 1000px; margin: 0 auto; padding: 24px">
-    <h1 style="margin-bottom: 12px">Mini Service Desk</h1>
+  <div class="container">
+    <div class="card" style="padding: 24px">
+      <div
+        style="
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 16px;
+          flex-wrap: wrap;
+        "
+      >
+        <div>
+          <h1 class="h1">Mini Service Desk</h1>
+          <div class="subtle">Track, assign, resolve — calmly.</div>
+        </div>
 
-    <section style="display: flex; gap: 12px; align-items: end; margin-bottom: 16px; flex-wrap: wrap">
-      <div>
-        <label>Status</label><br />
-        <select v-model="statusFilter" @change="load">
-          <option value="">All</option>
-          <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
-        </select>
+        <button class="btn btn-primary" @click="openCreate">+ Create ticket</button>
       </div>
 
-      <div>
-        <label>Priority</label><br />
-        <select v-model="priorityFilter" @change="load">
-          <option value="">All</option>
-          <option v-for="p in priorities" :key="p" :value="p">{{ p }}</option>
-        </select>
+      <hr class="hr" />
+
+      <div class="control-row">
+        <div class="controls-left">
+          <div class="field">
+            <label>Status</label>
+            <select v-model="statusFilter" @change="load">
+              <option value="">All</option>
+              <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Priority</label>
+            <select v-model="priorityFilter" @change="load">
+              <option value="">All</option>
+              <option v-for="p in priorities" :key="p" :value="p">{{ p }}</option>
+            </select>
+          </div>
+
+          <span class="badge">Filters: {{ filteredHint }}</span>
+        </div>
       </div>
 
-      <button style="margin-left: auto" @click="openCreate">+ Create ticket</button>
-    </section>
+      <div style="margin-top: 16px">
+        <p v-if="loading" class="subtle">Loading…</p>
 
-    <p style="opacity: 0.7; margin-top: -8px; margin-bottom: 12px">Filters: {{ filteredHint }}</p>
+        <p v-else-if="error" style="color: #b00020; white-space: pre-wrap; margin: 0">
+          {{ error }}
+        </p>
 
-    <p v-if="loading">Loading…</p>
-    <p v-else-if="error" style="color: #b00020; white-space: pre-wrap">{{ error }}</p>
+        <div v-else class="table-wrap">
+          <table>
+            <thead>
+            <tr>
+              <th style="width: 80px">ID</th>
+              <th>Title</th>
+              <th style="width: 180px">Status</th>
+              <th style="width: 140px">Priority</th>
+              <th style="width: 160px">Assignee</th>
+              <th style="width: 220px">Actions</th>
+            </tr>
+            </thead>
 
-    <table v-else border="1" cellpadding="8" style="border-collapse: collapse; width: 100%">
-      <thead>
-      <tr>
-        <th>ID</th>
-        <th>Title</th>
-        <th>Status</th>
-        <th>Priority</th>
-        <th>Assignee</th>
-        <th style="width: 220px">Actions</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr v-for="t in tickets" :key="t.id">
-        <td>{{ t.id }}</td>
-        <td>{{ t.title }}</td>
-        <td>
-          <select v-model="t.status" @change="quickStatusUpdate(t)">
-            <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
-          </select>
-        </td>
-        <td>{{ t.priority }}</td>
-        <td>{{ t.assignee ?? "-" }}</td>
-        <td>
-          <button @click="openEdit(t)">Edit</button>
-          <button style="margin-left: 8px" @click="remove(t.id)">Delete</button>
-        </td>
-      </tr>
-      <tr v-if="tickets.length === 0">
-        <td colspan="6" style="text-align: center; opacity: 0.7">No tickets</td>
-      </tr>
-      </tbody>
-    </table>
+            <tbody>
+            <tr v-for="t in tickets" :key="t.id">
+              <td>{{ t.id }}</td>
 
-    <div v-if="formOpen" style="position: fixed; inset: 0; background: rgba(0,0,0,.4); display: grid; place-items: center">
-      <div style="background: white; padding: 16px; width: 520px; border-radius: 8px">
-        <h2 style="margin-top: 0">{{ editId === null ? "Create ticket" : "Edit ticket" }}</h2>
+              <td>
+                <div style="font-weight: 650">{{ t.title }}</div>
+                <div class="subtle" style="margin-top: 4px; max-width: 520px">
+                  {{ t.description }}
+                </div>
+              </td>
 
-        <div style="display: grid; gap: 10px">
+              <td>
+                <select v-model="t.status" @change="quickStatusUpdate(t)">
+                  <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
+                </select>
+              </td>
+
+              <td>
+                <span class="badge">{{ t.priority }}</span>
+              </td>
+
+              <td>{{ t.assignee ?? "—" }}</td>
+
+              <td>
+                <div class="actions">
+                  <button class="btn" @click="openEdit(t)">Edit</button>
+                  <button class="btn btn-danger" @click="remove(t.id)">Delete</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr v-if="tickets.length === 0">
+              <td colspan="6" style="text-align: center; padding: 28px">
+                <div style="font-weight: 650">No tickets yet</div>
+                <div class="subtle" style="margin-top: 6px">
+                  Create your first ticket to start tracking requests.
+                </div>
+                <div style="margin-top: 14px">
+                  <button class="btn btn-primary" @click="openCreate">+ Create ticket</button>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div
+      v-if="formOpen"
+      class="modal-overlay"
+      @click.self="closeModal"
+      style="
+        position: fixed;
+        inset: 0;
+        background: rgba(17, 24, 39, 0.35);
+        display: grid;
+        place-items: center;
+        padding: 18px;
+      "
+    >
+      <div
+        class="card"
+        style="
+          width: min(560px, 100%);
+          padding: 20px;
+        "
+      >
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px">
           <div>
-            <label>Title</label><br />
-            <input v-model="formTitle" style="width: 100%" />
+            <h2 style="margin: 0; font-size: 20px; letter-spacing: -0.01em">{{ modalTitle }}</h2>
+            <div class="subtle" style="margin-top: 4px">Keep it short and clear.</div>
+          </div>
+
+          <button class="btn" @click="closeModal">✕</button>
+        </div>
+
+        <hr class="hr" />
+
+        <div style="display: grid; gap: 12px">
+          <div>
+            <label class="subtle" style="display:block; margin-bottom: 6px">Title</label>
+            <input v-model="formTitle" style="width: 100%" placeholder="e.g. Can't login" />
           </div>
 
           <div>
-            <label>Description</label><br />
-            <textarea v-model="formDescription" rows="4" style="width: 100%"></textarea>
+            <label class="subtle" style="display:block; margin-bottom: 6px">Description</label>
+            <textarea
+              v-model="formDescription"
+              rows="4"
+              style="width: 100%"
+              placeholder="What happened? Steps to reproduce? Expected behavior?"
+            ></textarea>
           </div>
 
-          <div style="display: flex; gap: 12px">
-            <div style="flex: 1">
-              <label>Priority</label><br />
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+            <div>
+              <label class="subtle" style="display:block; margin-bottom: 6px">Priority</label>
               <select v-model="formPriority" style="width: 100%">
                 <option v-for="p in priorities" :key="p" :value="p">{{ p }}</option>
               </select>
             </div>
 
-            <div style="flex: 1">
-              <label>Status</label><br />
+            <div>
+              <label class="subtle" style="display:block; margin-bottom: 6px">Status</label>
               <select v-model="formStatus" style="width: 100%">
                 <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
               </select>
@@ -214,16 +308,22 @@ const filteredHint = computed(() => {
           </div>
 
           <div>
-            <label>Assignee</label><br />
+            <label class="subtle" style="display:block; margin-bottom: 6px">Assignee</label>
             <input v-model="formAssignee" style="width: 100%" placeholder="optional" />
           </div>
 
-          <div style="display: flex; gap: 8px; justify-content: end">
-            <button @click="formOpen = false">Cancel</button>
-            <button @click="submit" :disabled="!formTitle || !formDescription">Save</button>
+          <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 6px">
+            <button class="btn" @click="closeModal">Cancel</button>
+            <button class="btn btn-primary" @click="submit" :disabled="!formTitle || !formDescription">
+              Save
+            </button>
           </div>
+
+          <p v-if="error" style="color:#b00020; margin: 4px 0 0; white-space: pre-wrap">
+            {{ error }}
+          </p>
         </div>
       </div>
     </div>
-  </main>
+  </div>
 </template>

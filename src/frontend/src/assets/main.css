@@ -1,1 +1,153 @@
-/* app styles */
+:root {
+  --bg: #f7f7f5;
+  --card: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+
+  --accent: #111827; /* почти черный */
+  --accent-2: #374151;
+
+  --radius: 16px;
+  --shadow: 0 10px 30px rgba(17, 24, 39, 0.08);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "SF Pro Text", Inter, Roboto, Arial;
+  line-height: 1.4;
+}
+
+a { color: inherit; }
+
+.container {
+  width: min(1100px, 100%);
+  margin: 48px auto;
+  padding: 0 20px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.h1 {
+  font-size: 40px;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.subtle {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.hr {
+  height: 1px;
+  background: var(--line);
+  border: 0;
+  margin: 18px 0;
+}
+
+/* controls */
+.control-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+}
+
+.controls-left {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: end;
+}
+
+.field label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+select, input, textarea {
+  width: 220px;
+  max-width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--text);
+  outline: none;
+}
+
+textarea { width: 100%; min-height: 110px; resize: vertical; }
+
+select:focus, input:focus, textarea:focus {
+  border-color: rgba(17, 24, 39, 0.35);
+  box-shadow: 0 0 0 4px rgba(17, 24, 39, 0.08);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text);
+  transition: transform .05s ease, background .15s ease, border-color .15s ease;
+}
+
+.btn:hover {
+  background: #fafafa;
+  border-color: rgba(17, 24, 39, 0.18);
+}
+.btn:active { transform: translateY(1px); }
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.btn-primary:hover { background: #0b1220; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1px solid var(--line);
+  color: var(--accent-2);
+  background: #f9fafb;
+}
+
+/* table */
+.table-wrap { overflow: auto; border-radius: 14px; border: 1px solid var(--line); }
+table { width: 100%; border-collapse: collapse; min-width: 820px; background: #fff; }
+th, td { padding: 12px 12px; border-bottom: 1px solid var(--line); text-align: left; }
+th { font-size: 12px; color: var(--muted); font-weight: 700; background: #fbfbfb; }
+tr:hover td { background: #fcfcfd; }
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+.btn-danger {
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #b91c1c;
+}
+.btn-danger:hover { background: rgba(239, 68, 68, 0.06); }
