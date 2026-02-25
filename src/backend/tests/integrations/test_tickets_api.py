@@ -5,9 +5,8 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text
 
 from app.api.tickets.service import ServiceDesk
-from app.main import app
 from app.db.session import get_session
-
+from app.main import app
 
 pytestmark = pytest.mark.asyncio
 
