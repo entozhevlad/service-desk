@@ -8,6 +8,7 @@ from app.db.base import Base
 
 
 class Ticket(Base):
+    """ORM модель тикета."""
     __tablename__ = "tickets"
 
     id: Mapped[UUID] = mapped_column(

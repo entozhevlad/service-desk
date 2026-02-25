@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import (
 
 
 def _get_database_url() -> str:
+    """Возвращает DSN для подключения к БД."""
     dsn = os.getenv("DATABASE_URL")
     if dsn:
         return dsn
@@ -33,6 +34,7 @@ _session_factory: async_sessionmaker[AsyncSession] | None = None
 
 
 def get_engine() -> AsyncEngine:
+    """Возвращает singleton-движок БД."""
     global _engine
     if _engine is None:
         _engine = create_async_engine(_get_database_url(), pool_pre_ping=True)
@@ -40,6 +42,7 @@ def get_engine() -> AsyncEngine:
 
 
 def get_session_factory() -> async_sessionmaker[AsyncSession]:
+    """Возвращает фабрику сессий БД."""
     global _session_factory
     if _session_factory is None:
         _session_factory = async_sessionmaker(
@@ -50,6 +53,7 @@ def get_session_factory() -> async_sessionmaker[AsyncSession]:
 
 
 async def get_session() -> AsyncIterator[AsyncSession]:
+    """Создает сессию БД для запроса."""
     session_factory = get_session_factory()
     async with session_factory() as session:
         yield session
