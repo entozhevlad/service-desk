@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.tickets.schemas import Ticket
+from app.api.tickets.schemas import Ticket, TicketDeleted
 from app.api.tickets.service import ServiceDesk
 from app.db.session import get_session
 
@@ -26,3 +26,15 @@ async def get_ticket(
     if ticket is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ticket not found")
     return ticket
+
+
+@tickets_router.delete("/tickets/{ticket_id}", response_model=TicketDeleted)
+async def delete_ticket(
+    ticket_id: UUID,
+    session: AsyncSession = Depends(get_session),
+) -> TicketDeleted:
+    service_desk = ServiceDesk(session)
+    deleted = await service_desk.delete_ticket(ticket_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ticket not found")
+    return TicketDeleted(id=ticket_id, message="Ticket deleted")
