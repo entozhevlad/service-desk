@@ -62,6 +62,7 @@ async def test_get_ticket_returns_ticket(mock_session: Mock) -> None:
     ticket_model = TicketModel()
     ticket_model.id = uuid.uuid4()
     ticket_model.created_at = datetime.now(timezone.utc)
+    ticket_model.description = "test"
 
     result = Mock()
     result.scalar_one_or_none.return_value = ticket_model
@@ -73,3 +74,33 @@ async def test_get_ticket_returns_ticket(mock_session: Mock) -> None:
     assert ticket is not None
     assert ticket.id == ticket_model.id
     assert ticket.created_at == ticket_model.created_at
+    assert ticket.description == ticket_model.description
+
+
+async def test_create_ticket_default_description(mock_session: Mock) -> None:
+    service = ServiceDesk(mock_session)
+    result = await service.create_ticket()
+
+    mock_session.add.assert_called_once()
+    added_ticket = mock_session.add.call_args.args[0]
+    assert isinstance(added_ticket, TicketModel)
+    assert added_ticket.description == ""
+
+
+async def test_update_ticket_updates_description(mock_session: Mock) -> None:
+    ticket_model = TicketModel()
+    ticket_model.id = uuid.uuid4()
+    ticket_model.created_at = datetime.now(timezone.utc)
+    ticket_model.description = "old"
+
+    result = Mock()
+    result.scalar_one_or_none.return_value = ticket_model
+    mock_session.execute = AsyncMock(return_value=result)
+
+    service = ServiceDesk(mock_session)
+    updated = await service.update_ticket(ticket_model.id, "new")
+
+    assert updated is not None
+    assert updated.description == "new"
+    assert ticket_model.description == "new"
+    mock_session.commit.assert_awaited_once()

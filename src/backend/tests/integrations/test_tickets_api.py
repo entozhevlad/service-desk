@@ -25,13 +25,35 @@ async def client(db_session: object):
 
 async def test_get_ticket_by_id(client: AsyncClient, db_session: object) -> None:
     service = ServiceDesk(db_session)
-    ticket = await service.create_ticket()
+    ticket = await service.create_ticket(description="hello")
 
     response = await client.get(f"/tickets/{ticket.id}")
 
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == str(ticket.id)
+    assert data["description"] == "hello"
+
+    await db_session.execute(
+        text("DELETE FROM tickets WHERE id = :id"),
+        {"id": uuid.UUID(data["id"])},
+    )
+    await db_session.commit()
+
+
+async def test_update_ticket_description(client: AsyncClient, db_session: object) -> None:
+    service = ServiceDesk(db_session)
+    ticket = await service.create_ticket(description="old")
+
+    response = await client.put(
+        f"/tickets/{ticket.id}",
+        json={"description": "new"},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["id"] == str(ticket.id)
+    assert data["description"] == "new"
 
     await db_session.execute(
         text("DELETE FROM tickets WHERE id = :id"),
