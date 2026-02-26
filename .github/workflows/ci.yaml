@@ -15,6 +15,7 @@ jobs:
 
   backend-lint:
     runs-on: ubuntu-latest
+    needs: [backend-build]
     defaults:
       run:
         working-directory: src/backend
@@ -46,6 +47,7 @@ jobs:
 
   backend-test:
     runs-on: ubuntu-latest
+    needs: [backend-build]
 
     services:
       postgres:
@@ -114,8 +116,9 @@ jobs:
 
   # ---------------- FRONTEND ----------------
 
-  frontend-tests-unit:
+  frontend-tests:
     runs-on: ubuntu-latest
+    needs: [frontend-build]
     defaults:
       run:
         working-directory: src/frontend
