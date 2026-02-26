@@ -44,32 +44,7 @@ jobs:
       - name: mypy
         run: uv run mypy app
 
-  backend-tests-unit:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: src/backend
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v3
-        with:
-          version: "latest"
-          enable-cache: true
-
-      - name: Install dependencies
-        run: uv sync --frozen || uv sync
-
-      - name: Unit tests
-        run: uv run pytest tests/unit
-
-  backend-tests-integration:
+  backend-test:
     runs-on: ubuntu-latest
 
     services:
@@ -107,6 +82,9 @@ jobs:
 
       - name: Install dependencies
         run: uv sync --frozen || uv sync
+
+      - name: Unit tests
+        run: uv run pytest tests/unit
 
       - name: Run migrations
         env:
