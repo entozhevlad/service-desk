@@ -6,12 +6,12 @@ on:
     paths:
       - "src/backend/**"
       - "frontend/**"
-      - ".github/workflows/ci.yml"
+      - ".github/workflows/ci.yaml"
   pull_request:
     paths:
       - "src/backend/**"
       - "frontend/**"
-      - ".github/workflows/ci.yml"
+      - ".github/workflows/ci.yaml"
   workflow_dispatch:
 
 concurrency:
