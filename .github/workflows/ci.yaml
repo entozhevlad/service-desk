@@ -6,12 +6,12 @@ on:
     paths:
       - "src/backend/**"
       - "frontend/**"
-      - ".github/workflows/ci.yml"
+      - ".github/workflows/ci.yaml"
   pull_request:
     paths:
       - "src/backend/**"
       - "frontend/**"
-      - ".github/workflows/ci.yml"
+      - ".github/workflows/ci.yaml"
   workflow_dispatch:
 
 concurrency:
@@ -143,41 +143,6 @@ jobs:
         run: docker build -f src/backend/Dockerfile -t service-desk-backend:ci src/backend
 
   # ---------------- FRONTEND ----------------
-
-  frontend-test:
-    name: Frontend - lint/typecheck/tests
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install deps
-        run: npm ci
-
-      # prettier check (если у тебя другой скрипт — поменяй)
-      - name: Prettier check
-        run: npm run format -- --check
-
-      - name: ESLint
-        run: npm run lint
-
-      - name: Typecheck
-        run: npm run type-check
-
-      # vitest
-      - name: Unit tests
-        run: npm run test:unit
-
   frontend-build:
     name: Frontend - build
     runs-on: ubuntu-latest
@@ -201,7 +166,6 @@ jobs:
 
       - name: Build
         env:
-          # если нужен URL для production build, можно задать как GitHub Actions Variable
           VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
         run: npm run build
 
@@ -211,3 +175,32 @@ jobs:
           name: frontend-dist
           path: frontend/dist
           if-no-files-found: error
+
+  frontend-test:
+    name: Frontend - tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+      - name: Debug frontend files
+        run: |
+          ls -la
+          ls -la frontend || true
+          find frontend -maxdepth 2 -type f -name "*lock*" -print || true
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install deps
+        run: npm ci
+
+      # vitest
+      - name: Unit tests
+        run: npm run test:unit

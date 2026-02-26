@@ -27,7 +27,6 @@ const formTitle = ref("");
 const formDescription = ref("");
 const formStatus = ref<TicketStatus>("new");
 const formPriority = ref<TicketPriority>("medium");
-const formAssignee = ref<string>("");
 
 async function load() {
   loading.value = true;
@@ -55,7 +54,6 @@ function openCreate() {
   formDescription.value = "";
   formStatus.value = "new";
   formPriority.value = "medium";
-  formAssignee.value = "";
   formOpen.value = true;
 }
 
@@ -300,11 +298,6 @@ const modalTitle = computed(() => (editId.value === null ? "Create ticket" : "Ed
                 <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
               </select>
             </div>
-          </div>
-
-          <div>
-            <label class="subtle" style="display:block; margin-bottom: 6px">Assignee</label>
-            <input v-model="formAssignee" style="width: 100%" placeholder="optional" />
           </div>
 
           <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 6px">
