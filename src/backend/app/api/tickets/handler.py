@@ -1,12 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.tickets.dependencies import get_service_desk
-from app.api.tickets.schemas import (
-    Ticket,
-    TicketCreate,
-    TicketDeleted,
-    TicketUpdate,
-)
+from app.api.tickets.schemas import (Ticket, TicketCreate, TicketDeleted,
+                                     TicketUpdate)
 from app.api.tickets.service import ServiceDesk
 
 tickets_router = APIRouter(tags=["tickets"])
