@@ -27,7 +27,10 @@ export interface TicketUpdate {
 }
 
 export async function listTickets(params?: { status?: string; priority?: string }) {
-  const query = params ? new URLSearchParams(params as any).toString() : "";
+  const search = new URLSearchParams();
+  if (params?.status) search.set("status", params.status);
+  if (params?.priority) search.set("priority", params.priority);
+  const query = search.toString();
   const url = query ? `/tickets?${query}` : "/tickets";
   return http.get<Ticket[]>(url);
 }
