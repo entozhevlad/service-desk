@@ -188,6 +188,11 @@ jobs:
 
       - name: Setup Node
         uses: actions/setup-node@v4
+      - name: Debug frontend files
+        run: |
+          ls -la
+          ls -la frontend || true
+          find frontend -maxdepth 2 -type f -name "*lock*" -print || true
         with:
           node-version: 20
           cache: npm
