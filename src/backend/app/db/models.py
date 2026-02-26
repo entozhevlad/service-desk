@@ -40,13 +40,21 @@ class Ticket(Base):
         server_default="",
     )
     status: Mapped[TicketStatus] = mapped_column(
-        Enum(TicketStatus, name="ticket_status"),
+        Enum(
+            TicketStatus,
+            name="ticket_status",
+            values_callable=lambda enum: [member.value for member in enum],
+        ),
         nullable=False,
         default=TicketStatus.NEW,
         server_default=TicketStatus.NEW.value,
     )
     priority: Mapped[TicketPriority] = mapped_column(
-        Enum(TicketPriority, name="ticket_priority"),
+        Enum(
+            TicketPriority,
+            name="ticket_priority",
+            values_callable=lambda enum: [member.value for member in enum],
+        ),
         nullable=False,
         default=TicketPriority.MEDIUM,
         server_default=TicketPriority.MEDIUM.value,
