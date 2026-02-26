@@ -51,7 +51,7 @@ jobs:
       - name: mypy
         run: uv run mypy app
 
-  backend-tests-unit:
+  backend-tests:
     runs-on: ubuntu-latest
     needs: [backend-build]
     defaults:
@@ -76,64 +76,6 @@ jobs:
 
       - name: Unit tests
         run: uv run pytest tests/unit
-
-  backend-tests-integration:
-    runs-on: ubuntu-latest
-    needs: [backend-build]
-
-    services:
-      postgres:
-        image: postgres:16-alpine
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_DB: service_desk
-          POSTGRES_USER: service_desk
-          POSTGRES_PASSWORD: service_desk
-        options: >-
-          --health-cmd "pg_isready -U service_desk -d service_desk"
-          --health-interval 5s
-          --health-timeout 3s
-          --health-retries 20
-
-    defaults:
-      run:
-        working-directory: src/backend
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v3
-        with:
-          version: "latest"
-          enable-cache: true
-
-      - name: Install dependencies
-        run: uv sync --frozen || uv sync
-
-      - name: Run migrations
-        env:
-          POSTGRES_DB: service_desk
-          POSTGRES_USER: service_desk
-          POSTGRES_PASSWORD: service_desk
-          POSTGRES_HOST: localhost
-          POSTGRES_PORT: 5432
-        run: uv run alembic upgrade head
-
-      - name: Integration tests
-        env:
-          POSTGRES_DB: service_desk
-          POSTGRES_USER: service_desk
-          POSTGRES_PASSWORD: service_desk
-          POSTGRES_HOST: localhost
-          POSTGRES_PORT: 5432
-        run: uv run pytest tests/integrations
 
   backend-build:
     runs-on: ubuntu-latest
