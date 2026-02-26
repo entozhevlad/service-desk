@@ -19,8 +19,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ---------------- BACKEND ----------------
-
   backend-lint:
     runs-on: ubuntu-latest
     needs: [backend-build]
@@ -145,8 +143,6 @@ jobs:
       - name: Build backend image
         run: docker build -f src/backend/Dockerfile -t service-desk-backend:ci src/backend
 
-  # ---------------- FRONTEND ----------------
-
   frontend-test:
     name: Frontend - tests
     runs-on: ubuntu-latest
@@ -168,7 +164,6 @@ jobs:
       - name: Install deps
         run: npm ci
 
-      # vitest
       - name: Unit tests
         run: npm run test:unit -- --run
 

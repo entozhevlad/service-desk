@@ -56,7 +56,6 @@ describe("tickets api (fetch)", () => {
   });
 
   it("deleteTicket calls DELETE /tickets/{id}", async () => {
-    // для delete может быть 204
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       status: 204,
