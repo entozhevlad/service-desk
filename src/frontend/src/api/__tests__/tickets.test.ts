@@ -25,6 +25,15 @@ describe("tickets api (fetch)", () => {
     );
   });
 
+  it("listTickets omits empty filters from query", async () => {
+    mockFetch([]);
+    await listTickets({ status: undefined, priority: "high" });
+
+    const calledUrl = String((fetch as any).mock.calls[0][0]);
+    expect(calledUrl).toContain("/tickets?priority=high");
+    expect(calledUrl).not.toContain("status=undefined");
+  });
+
   it("getTicket calls /tickets/{id}", async () => {
     mockFetch({ id: 1 });
     await getTicket(1);
@@ -56,7 +65,6 @@ describe("tickets api (fetch)", () => {
   });
 
   it("deleteTicket calls DELETE /tickets/{id}", async () => {
-    // для delete может быть 204
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       status: 204,
