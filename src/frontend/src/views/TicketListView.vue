@@ -33,14 +33,7 @@ async function load() {
   error.value = null;
 
   try {
-    // важно: не шлем undefined в query как строку "undefined"
-    const status = statusFilter.value.trim() || undefined;
-    const priority = priorityFilter.value.trim() || undefined;
-
-    tickets.value = await listTickets({
-      status,
-      priority,
-    });
+    tickets.value = await listTickets();
   } catch (e: any) {
     error.value = e?.message ?? "Failed to load tickets";
   } finally {
@@ -123,6 +116,14 @@ const filteredHint = computed(() => {
   return parts.length ? parts.join(", ") : "no filters";
 });
 
+const visibleTickets = computed(() =>
+  tickets.value.filter((ticket) => {
+    if (statusFilter.value && ticket.status !== statusFilter.value) return false;
+    if (priorityFilter.value && ticket.priority !== priorityFilter.value) return false;
+    return true;
+  })
+);
+
 const modalTitle = computed(() => (editId.value === null ? "Create ticket" : "Edit ticket"));
 </script>
 
@@ -151,7 +152,7 @@ const modalTitle = computed(() => (editId.value === null ? "Create ticket" : "Ed
         <div class="controls-left">
           <div class="field">
             <label>Status</label>
-            <select v-model="statusFilter" @change="load">
+            <select v-model="statusFilter">
               <option value="">All</option>
               <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
             </select>
@@ -159,7 +160,7 @@ const modalTitle = computed(() => (editId.value === null ? "Create ticket" : "Ed
 
           <div class="field">
             <label>Priority</label>
-            <select v-model="priorityFilter" @change="load">
+            <select v-model="priorityFilter">
               <option value="">All</option>
               <option v-for="p in priorities" :key="p" :value="p">{{ p }}</option>
             </select>
@@ -189,7 +190,7 @@ const modalTitle = computed(() => (editId.value === null ? "Create ticket" : "Ed
             </thead>
 
             <tbody>
-            <tr v-for="t in tickets" :key="t.id">
+            <tr v-for="t in visibleTickets" :key="t.id">
               <td>{{ t.id }}</td>
 
               <td>
@@ -217,7 +218,7 @@ const modalTitle = computed(() => (editId.value === null ? "Create ticket" : "Ed
               </td>
             </tr>
 
-            <tr v-if="tickets.length === 0">
+            <tr v-if="visibleTickets.length === 0">
               <td colspan="6" style="text-align: center; padding: 28px">
                 <div style="font-weight: 650">No tickets yet</div>
                 <div class="subtle" style="margin-top: 6px">
