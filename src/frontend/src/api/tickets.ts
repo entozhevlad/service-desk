@@ -9,7 +9,6 @@ export interface Ticket {
   description: string;
   status: TicketStatus;
   priority: TicketPriority;
-  assignee: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -18,7 +17,6 @@ export interface TicketCreate {
   title: string;
   description: string;
   priority: TicketPriority;
-  assignee?: string | null;
 }
 
 export interface TicketUpdate {
@@ -26,7 +24,6 @@ export interface TicketUpdate {
   description?: string;
   status?: TicketStatus;
   priority?: TicketPriority;
-  assignee?: string | null;
 }
 
 export async function listTickets(params?: { status?: string; priority?: string }) {

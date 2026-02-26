@@ -65,7 +65,6 @@ function openEdit(t: Ticket) {
   formDescription.value = t.description;
   formStatus.value = t.status;
   formPriority.value = t.priority;
-  formAssignee.value = t.assignee ?? "";
   formOpen.value = true;
 }
 
@@ -81,7 +80,6 @@ async function submit() {
         title: formTitle.value,
         description: formDescription.value,
         priority: formPriority.value,
-        assignee: formAssignee.value ? formAssignee.value : null,
       });
     } else {
       await updateTicket(editId.value, {
@@ -89,7 +87,6 @@ async function submit() {
         description: formDescription.value,
         status: formStatus.value,
         priority: formPriority.value,
-        assignee: formAssignee.value ? formAssignee.value : null,
       });
     }
     formOpen.value = false;
@@ -215,8 +212,6 @@ const modalTitle = computed(() => (editId.value === null ? "Create ticket" : "Ed
               <td>
                 <span class="badge">{{ t.priority }}</span>
               </td>
-
-              <td>{{ t.assignee ?? "—" }}</td>
 
               <td>
                 <div class="actions">
