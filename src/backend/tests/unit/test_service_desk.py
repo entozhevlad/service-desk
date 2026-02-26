@@ -1,4 +1,3 @@
-import uuid
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, Mock
 
@@ -6,6 +5,7 @@ import pytest
 
 from app.api.tickets.service import ServiceDesk
 from app.db.models import Ticket as TicketModel
+from app.db.types import TicketPriority, TicketStatus
 
 pytestmark = pytest.mark.asyncio
 
@@ -17,9 +17,11 @@ def mock_session() -> Mock:
     session.commit = AsyncMock()
     async def _refresh(ticket: TicketModel) -> None:
         if ticket.id is None:
-            ticket.id = uuid.uuid4()
+            ticket.id = 1
         if ticket.created_at is None:
             ticket.created_at = datetime.now(timezone.utc)
+        if ticket.updated_at is None:
+            ticket.updated_at = datetime.now(timezone.utc)
 
     session.refresh = AsyncMock(side_effect=_refresh)
     return session
@@ -34,11 +36,14 @@ async def test_create_ticket_returns_id_and_timestamp(
     service_desk: ServiceDesk,
     mock_session: Mock,
 ) -> None:
-    result = await service_desk.create_ticket()
+    result = await service_desk.create_ticket(title="test")
 
-    assert isinstance(result.id, uuid.UUID)
+    assert isinstance(result.id, int)
     assert isinstance(result.created_at, datetime)
     assert result.created_at.tzinfo is not None
+    assert result.title == "test"
+    assert result.status == TicketStatus.NEW
+    assert result.priority == TicketPriority.MEDIUM
 
     mock_session.add.assert_called_once()
     added_ticket = mock_session.add.call_args.args[0]
@@ -53,16 +58,20 @@ async def test_get_ticket_returns_none_when_missing(mock_session: Mock) -> None:
     mock_session.execute = AsyncMock(return_value=result)
     service = ServiceDesk(mock_session)
 
-    ticket = await service.get_ticket(uuid.uuid4())
+    ticket = await service.get_ticket(1)
 
     assert ticket is None
 
 
 async def test_get_ticket_returns_ticket(mock_session: Mock) -> None:
     ticket_model = TicketModel()
-    ticket_model.id = uuid.uuid4()
+    ticket_model.id = 10
     ticket_model.created_at = datetime.now(timezone.utc)
+    ticket_model.updated_at = datetime.now(timezone.utc)
+    ticket_model.title = "test"
     ticket_model.description = "test"
+    ticket_model.status = TicketStatus.NEW
+    ticket_model.priority = TicketPriority.MEDIUM
 
     result = Mock()
     result.scalar_one_or_none.return_value = ticket_model
@@ -75,47 +84,73 @@ async def test_get_ticket_returns_ticket(mock_session: Mock) -> None:
     assert ticket.id == ticket_model.id
     assert ticket.created_at == ticket_model.created_at
     assert ticket.description == ticket_model.description
+    assert ticket.title == ticket_model.title
+    assert ticket.status == ticket_model.status
+    assert ticket.priority == ticket_model.priority
 
 
 async def test_create_ticket_default_description(mock_session: Mock) -> None:
     service = ServiceDesk(mock_session)
-    result = await service.create_ticket()
+    result = await service.create_ticket(title="test")
 
     mock_session.add.assert_called_once()
     added_ticket = mock_session.add.call_args.args[0]
     assert isinstance(added_ticket, TicketModel)
     assert added_ticket.description == ""
+    assert added_ticket.status == TicketStatus.NEW
+    assert added_ticket.priority == TicketPriority.MEDIUM
 
 
 async def test_update_ticket_updates_description(mock_session: Mock) -> None:
     ticket_model = TicketModel()
-    ticket_model.id = uuid.uuid4()
+    ticket_model.id = 5
     ticket_model.created_at = datetime.now(timezone.utc)
+    ticket_model.updated_at = datetime.now(timezone.utc)
+    ticket_model.title = "old"
     ticket_model.description = "old"
+    ticket_model.status = TicketStatus.NEW
+    ticket_model.priority = TicketPriority.MEDIUM
 
     result = Mock()
     result.scalar_one_or_none.return_value = ticket_model
     mock_session.execute = AsyncMock(return_value=result)
 
     service = ServiceDesk(mock_session)
-    updated = await service.update_ticket(ticket_model.id, "new")
+    updated = await service.update_ticket(
+        ticket_model.id,
+        description="new",
+        status=TicketStatus.DONE,
+        priority=TicketPriority.HIGH,
+        title="new title",
+    )
 
     assert updated is not None
     assert updated.description == "new"
+    assert updated.title == "new title"
+    assert updated.status == TicketStatus.DONE
+    assert updated.priority == TicketPriority.HIGH
     assert ticket_model.description == "new"
     mock_session.commit.assert_awaited_once()
 
 
 async def test_list_tickets_returns_models(mock_session: Mock) -> None:
     ticket_one = TicketModel()
-    ticket_one.id = uuid.uuid4()
+    ticket_one.id = 1
     ticket_one.created_at = datetime.now(timezone.utc)
+    ticket_one.updated_at = datetime.now(timezone.utc)
+    ticket_one.title = "first"
     ticket_one.description = "first"
+    ticket_one.status = TicketStatus.NEW
+    ticket_one.priority = TicketPriority.MEDIUM
 
     ticket_two = TicketModel()
-    ticket_two.id = uuid.uuid4()
+    ticket_two.id = 2
     ticket_two.created_at = datetime.now(timezone.utc)
+    ticket_two.updated_at = datetime.now(timezone.utc)
+    ticket_two.title = "second"
     ticket_two.description = "second"
+    ticket_two.status = TicketStatus.NEW
+    ticket_two.priority = TicketPriority.MEDIUM
 
     result = Mock()
     result.scalars.return_value.all.return_value = [ticket_one, ticket_two]
