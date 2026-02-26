@@ -10,6 +10,14 @@ const ticket = {
   priority: "high",
 };
 
+const secondTicket = {
+  id: 2,
+  title: "Printer issue",
+  description: "Paper jam",
+  status: "done",
+  priority: "low",
+};
+
 beforeEach(() => {
   vi.restoreAllMocks();
 });
@@ -41,8 +49,8 @@ describe("TicketListView", () => {
     expect(wrapper.text()).toContain("Filters: no filters");
   });
 
-  it("sends filtered request when status filter changes", async () => {
-    mockFetchSequence([{ body: [ticket] }, { body: [] }]);
+  it("filters rendered tickets by status on client side", async () => {
+    mockFetchSequence([{ body: [ticket, secondTicket] }]);
 
     const wrapper = mount(TicketListView);
     await flushPromises();
@@ -51,8 +59,9 @@ describe("TicketListView", () => {
     await statusFilter.setValue("done");
     await flushPromises();
 
-    const secondCallUrl = String((fetch as any).mock.calls[1][0]);
-    expect(secondCallUrl).toContain("status=done");
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(wrapper.text()).toContain("Printer issue");
+    expect(wrapper.text()).not.toContain("Login issue");
   });
 
   it("creates a ticket from modal and reloads list", async () => {
