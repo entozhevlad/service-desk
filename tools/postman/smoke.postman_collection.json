@@ -40,7 +40,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"description\": \"printer is broken\"\n}",
+          "raw": "{\n  \"title\": \"Printer issue\",\n  \"description\": \"printer is broken\",\n  \"status\": \"new\",\n  \"priority\": \"medium\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -66,7 +66,10 @@
               "  var jsonData = pm.response.json();",
               "  pm.expect(jsonData.id).to.exist;",
               "  pm.expect(jsonData.created_at).to.exist;",
+              "  pm.expect(jsonData.title).to.eql(\"Printer issue\");",
               "  pm.expect(jsonData.description).to.eql(\"printer is broken\");",
+              "  pm.expect(jsonData.status).to.eql(\"new\");",
+              "  pm.expect(jsonData.priority).to.eql(\"medium\");",
               "});",
               "pm.environment.set(\"ticketId\", pm.response.json().id);"
             ]
@@ -127,6 +130,7 @@
               "pm.test(\"id matches\", function () {",
               "  var jsonData = pm.response.json();",
               "  pm.expect(jsonData.id).to.eql(pm.environment.get(\"ticketId\"));",
+              "  pm.expect(jsonData.title).to.eql(\"Printer issue\");",
               "});"
             ]
           }
@@ -140,7 +144,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"description\": \"printer fixed\"\n}",
+          "raw": "{\n  \"title\": \"Printer issue (fixed)\",\n  \"description\": \"printer fixed\",\n  \"status\": \"done\",\n  \"priority\": \"low\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -162,9 +166,11 @@
               "pm.test(\"status 200\", function () {",
               "  pm.response.to.have.status(200);",
               "});",
-              "pm.test(\"updated description\", function () {",
+              "pm.test(\"updated fields\", function () {",
               "  var jsonData = pm.response.json();",
               "  pm.expect(jsonData.description).to.eql(\"printer fixed\");",
+              "  pm.expect(jsonData.status).to.eql(\"done\");",
+              "  pm.expect(jsonData.priority).to.eql(\"low\");",
               "});"
             ]
           }
