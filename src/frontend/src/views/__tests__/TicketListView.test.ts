@@ -47,7 +47,7 @@ describe("TicketListView", () => {
     const wrapper = mount(TicketListView);
     await flushPromises();
 
-    const statusFilter = wrapper.findAll("select")[0];
+    const statusFilter = wrapper.get("select");
     await statusFilter.setValue("done");
     await flushPromises();
 
