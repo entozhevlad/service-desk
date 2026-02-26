@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.tickets.dependencies import get_service_desk
@@ -16,12 +14,17 @@ async def create_ticket(
     service_desk: ServiceDesk = Depends(get_service_desk),
 ) -> Ticket:
     """Создает тикет."""
-    return await service_desk.create_ticket(description=payload.description)
+    return await service_desk.create_ticket(
+        title=payload.title,
+        description=payload.description,
+        status=payload.status,
+        priority=payload.priority,
+    )
 
 
 @tickets_router.get("/tickets/{ticket_id}", response_model=Ticket)
 async def get_ticket(
-    ticket_id: UUID,
+    ticket_id: int,
     service_desk: ServiceDesk = Depends(get_service_desk),
 ) -> Ticket:
     """Возвращает тикет по идентификатору."""
@@ -36,12 +39,24 @@ async def get_ticket(
 
 @tickets_router.put("/tickets/{ticket_id}", response_model=Ticket)
 async def update_ticket(
-    ticket_id: UUID,
+    ticket_id: int,
     payload: TicketUpdate,
     service_desk: ServiceDesk = Depends(get_service_desk),
 ) -> Ticket:
     """Обновляет тикет по идентификатору."""
-    ticket = await service_desk.update_ticket(ticket_id, payload.description)
+    payload_data = payload.model_dump(exclude_unset=True)
+    if not payload_data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No fields to update",
+        )
+    ticket = await service_desk.update_ticket(
+        ticket_id,
+        title=payload.title,
+        description=payload.description,
+        status=payload.status,
+        priority=payload.priority,
+    )
     if ticket is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -60,7 +75,7 @@ async def list_tickets(
 
 @tickets_router.delete("/tickets/{ticket_id}", response_model=TicketDeleted)
 async def delete_ticket(
-    ticket_id: UUID,
+    ticket_id: int,
     service_desk: ServiceDesk = Depends(get_service_desk),
 ) -> TicketDeleted:
     """Удаляет тикет по идентификатору."""
