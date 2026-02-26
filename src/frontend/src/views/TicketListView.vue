@@ -140,7 +140,6 @@ const modalTitle = computed(() => (editId.value === null ? "Create ticket" : "Ed
       >
         <div>
           <h1 class="h1">Mini Service Desk</h1>
-          <div class="subtle">Track, assign, resolve — calmly.</div>
         </div>
 
         <button class="btn btn-primary" @click="openCreate">+ Create ticket</button>
@@ -185,7 +184,6 @@ const modalTitle = computed(() => (editId.value === null ? "Create ticket" : "Ed
               <th>Title</th>
               <th style="width: 180px">Status</th>
               <th style="width: 140px">Priority</th>
-              <th style="width: 160px">Assignee</th>
               <th style="width: 220px">Actions</th>
             </tr>
             </thead>
