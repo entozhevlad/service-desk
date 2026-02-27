@@ -112,27 +112,19 @@ jobs:
   frontend-build:
     name: Frontend - build
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: src/frontend
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: src/frontend/package-lock.json
+      - name: Build frontend image
+        run: docker build -f src/frontend/Dockerfile --build-arg VITE_API_BASE_URL=/api -t service-desk-frontend:ci src/frontend
 
-      - name: Install deps
-        run: npm ci
-
-      - name: Build
-        env:
-          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
-        run: npm run build
+      - name: Extract dist artifact
+        run: |
+          docker create --name frontend-dist service-desk-frontend:ci
+          mkdir -p src/frontend/dist
+          docker cp frontend-dist:/usr/share/nginx/html/. src/frontend/dist
+          docker rm frontend-dist
 
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4
