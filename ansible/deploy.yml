@@ -1,0 +1,39 @@
+---
+- name: Deploy service-desk stack
+  hosts: app
+  become: true
+
+  vars:
+    app_dir: /opt/service-desk
+
+  tasks:
+    - name: Create application directory
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: "0755"
+
+    - name: Copy production compose file
+      ansible.builtin.copy:
+        src: ../docker-compose.prod.yaml
+        dest: "{{ app_dir }}/docker-compose.yaml"
+        owner: ubuntu
+        group: ubuntu
+        mode: "0644"
+
+    - name: Render environment file
+      ansible.builtin.template:
+        src: templates/service-desk.env.j2
+        dest: "{{ app_dir }}/.env"
+        owner: ubuntu
+        group: ubuntu
+        mode: "0600"
+
+    - name: Start containers
+      ansible.builtin.command:
+        cmd: docker compose up -d
+        chdir: "{{ app_dir }}"
+      register: compose_up
+      changed_when: "'Started' in compose_up.stdout or 'Running' in compose_up.stdout or 'Created' in compose_up.stdout or 'Recreated' in compose_up.stdout"
