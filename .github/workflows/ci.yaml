@@ -183,3 +183,39 @@ jobs:
           tags: |
             ${{ vars.BACKEND_IMAGE_REPOSITORY }}:${{ steps.image_tag.outputs.value }}
             ${{ vars.BACKEND_IMAGE_REPOSITORY }}:latest
+
+  frontend-image-publish:
+    name: Frontend - build and push image
+    runs-on: ubuntu-latest
+    needs: [frontend-test]
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set image tag
+        id: image_tag
+        run: |
+          echo "value=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to cloud registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.REGISTRY_HOST }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: src/frontend
+          file: src/frontend/Dockerfile
+          build-args: |
+            VITE_API_BASE_URL=/api
+          push: true
+          tags: |
+            ${{ vars.FRONTEND_IMAGE_REPOSITORY }}:${{ steps.image_tag.outputs.value }}
+            ${{ vars.FRONTEND_IMAGE_REPOSITORY }}:latest
