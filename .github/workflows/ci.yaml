@@ -34,7 +34,10 @@ jobs:
           version: v3.15.4
 
       - name: Helm lint
-        run: helm lint helm/service-desk-backend
+        run: |
+          helm lint helm/service-desk-backend
+          helm lint helm/service-desk-frontend
+          helm lint helm/service-desk-monitoring
 
   backend-lint:
     runs-on: ubuntu-latest
