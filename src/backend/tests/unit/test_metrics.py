@@ -24,5 +24,7 @@ def test_metrics_endpoint_returns_prometheus_metrics(monkeypatch) -> None:
 
     assert metrics_response.status_code == 200
     assert "http_requests_total" in metrics_response.text
-    assert 'method="GET",path="/ping",status="200"' in metrics_response.text
+    assert 'handler="/ping"' in metrics_response.text
+    assert 'method="GET"' in metrics_response.text
+    assert 'status="200"' in metrics_response.text
     assert "http_request_duration_seconds" in metrics_response.text
