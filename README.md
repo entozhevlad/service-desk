@@ -162,16 +162,21 @@ export REGISTRY_HOST=cr.example.com
 export REGISTRY_USER=svc_service_desk
 export REGISTRY_PASSWORD=***REDACTED***
 export BACKEND_IMAGE_REPOSITORY=cr.example.com/team/service-desk-backend
+export FRONTEND_IMAGE_REPOSITORY=cr.example.com/team/service-desk-frontend
 
 docker login "$REGISTRY_HOST" -u "$REGISTRY_USER" -p "$REGISTRY_PASSWORD"
 docker build -f src/backend/Dockerfile -t "$BACKEND_IMAGE_REPOSITORY:$(git rev-parse HEAD)" src/backend
 docker push "$BACKEND_IMAGE_REPOSITORY:$(git rev-parse HEAD)"
+docker build -f src/frontend/Dockerfile --build-arg VITE_API_BASE_URL=/api -t "$FRONTEND_IMAGE_REPOSITORY:$(git rev-parse HEAD)" src/frontend
+docker push "$FRONTEND_IMAGE_REPOSITORY:$(git rev-parse HEAD)"
 ```
 
-Через GitHub Actions (job `backend-image-publish`):
+Через GitHub Actions (jobs `backend-image-publish` и
+`frontend-image-publish`):
 
 - `vars.REGISTRY_HOST` — адрес registry
 - `vars.BACKEND_IMAGE_REPOSITORY` — полный путь до backend image
+- `vars.FRONTEND_IMAGE_REPOSITORY` — полный путь до frontend image
 - `secrets.REGISTRY_USERNAME` — пользователь registry
 - `secrets.REGISTRY_PASSWORD` — пароль/token registry
 
@@ -268,32 +273,74 @@ kubectl run loadgen \
   -- -z 3m -c 100 http://service-desk-backend:8000/healthz
 ```
 
-### Как подключить Prometheus/Grafana к `/metrics`
+### Frontend в Kubernetes и доступ извне
 
-Backend отдает Prometheus-метрики на `GET /metrics`.
-
-Быстрая проверка вручную:
+Для frontend добавлен отдельный chart `helm/service-desk-frontend`.
 
 ```bash
-kubectl port-forward -n service-desk deploy/service-desk-backend 8000:8000
-curl -s http://127.0.0.1:8000/metrics | head
+helm upgrade --install service-desk-frontend ./helm/service-desk-frontend \
+  --namespace service-desk \
+  --set image.repository="$FRONTEND_IMAGE_REPOSITORY" \
+  --set image.tag="$(git rev-parse HEAD)"
 ```
 
-Если используется `kube-prometheus-stack`, добавьте scrape-конфигурацию
-через `ServiceMonitor` (если CRD уже установлен):
+По умолчанию chart поднимает `NodePort` сервис на `30081`.
+Если у ВМ открыт порт, сайт доступен снаружи:
 
-```yaml
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: service-desk-backend
-  namespace: service-desk
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: service-desk-backend
-  endpoints:
-    - port: http
-      path: /metrics
-      interval: 15s
+```text
+http://<VM_PUBLIC_IP>:30081
 ```
+
+Убедитесь, что в security group/фаерволе ВМ разрешен входящий TCP на `30081`.
+
+### Prometheus + Grafana через Helm
+
+Для учебного стенда добавлен lightweight chart
+`helm/service-desk-monitoring` (Prometheus + Grafana).
+
+```bash
+helm upgrade --install service-desk-monitoring ./helm/service-desk-monitoring \
+  --namespace service-desk \
+  --set-string prometheus.backendTarget=service-desk-backend.service-desk.svc.cluster.local:8000 \
+  --set-string grafana.adminPassword='<change-me>'
+```
+
+Проверка:
+
+```bash
+kubectl get pods -n service-desk
+kubectl get svc -n service-desk
+```
+
+Grafana по умолчанию публикуется как `NodePort` `30300`:
+
+```text
+http://<VM_PUBLIC_IP>:30300
+```
+
+Убедитесь, что во внешнем фаерволе/SG открыт TCP порт `30300`.
+
+Логин: `admin`, пароль: значение `grafana.adminPassword`.
+
+### Метрики и дашборд по заявкам
+
+Backend отдает метрики на `GET /metrics`.
+В chart мониторинга уже предзагружен dashboard
+`Service Desk Backend Overview` с панелями:
+
+- общий RPS
+- RPS создания заявок (`POST /ticket`)
+- количество созданных заявок за последний час
+- 5xx RPS
+
+Примеры PromQL:
+
+```promql
+sum(rate(http_requests_total[1m]))
+sum(rate(http_requests_total{handler="/ticket",method="POST",status=~"2.."}[5m]))
+sum(increase(http_requests_total{handler="/ticket",method="POST",status=~"2.."}[1h]))
+sum(rate(http_requests_total{status=~"5.."}[5m]))
+```
+
+Для лабы dashboard по созданию заявок обычно не обязателен, но это сильный
+плюс на защите: видно и бизнес-метрику, и техническое состояние API.
