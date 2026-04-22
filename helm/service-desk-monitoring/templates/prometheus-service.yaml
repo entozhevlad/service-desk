@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "service-desk-monitoring.prometheusName" . }}
+  labels:
+    {{- include "service-desk-monitoring.labels" . | nindent 4 }}
+    app.kubernetes.io/component: prometheus
+spec:
+  type: {{ .Values.prometheus.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.prometheus.service.port }}
+      targetPort: http
+      protocol: TCP
+      {{- if and (eq .Values.prometheus.service.type "NodePort") .Values.prometheus.service.nodePort }}
+      nodePort: {{ .Values.prometheus.service.nodePort }}
+      {{- end }}
+  selector:
+    {{- include "service-desk-monitoring.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: prometheus
