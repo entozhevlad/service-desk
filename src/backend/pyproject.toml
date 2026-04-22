@@ -19,6 +19,7 @@ dependencies = [
     "sqlalchemy>=2.0.47",
     "uvicorn>=0.41.0",
     "flake8>=7.3.0",
+    "prometheus-fastapi-instrumentator>=7.1.0",
 ]
 
 [tool.mypy]

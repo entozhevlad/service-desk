@@ -34,3 +34,7 @@ Thumbs.db
 
 
 *.pid
+
+infra/terraform
+ansible/group_vars/app.yaml
+ansible/inventory.ini

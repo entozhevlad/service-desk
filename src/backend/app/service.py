@@ -2,12 +2,14 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.responses import PlainTextResponse
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.db.session import get_engine
 
 
 def create_app(root_message: str = "Welcome") -> FastAPI:
     """Создает экземпляр приложения FastAPI."""
+
     @asynccontextmanager
     async def lifespan(_: FastAPI):
         """Управляет жизненным циклом приложения."""
@@ -21,5 +23,14 @@ def create_app(root_message: str = "Welcome") -> FastAPI:
         if request.url.path == "/":
             return PlainTextResponse(root_message)
         return await call_next(request)
+
+    instrumentator = Instrumentator(
+        should_group_status_codes=False,
+        excluded_handlers=["/metrics"],
+    )
+    instrumentator.instrument(app).expose(
+        app,
+        include_in_schema=False,
+    )
 
     return app
