@@ -19,6 +19,10 @@ prometheus:
       memory: 768Mi
   retention: 24h
   scrapeInterval: 15s
+  backendPodScrape:
+    enabled: true
+    appNameLabel: service-desk-backend
+    containerPort: "8000"
   backendTarget: service-desk-backend.service-desk.svc.cluster.local:8000
 
 grafana:

@@ -1,0 +1,15 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "service-desk-monitoring.prometheusName" . }}
+  labels:
+    {{- include "service-desk-monitoring.labels" . | nindent 4 }}
+    app.kubernetes.io/component: prometheus
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "service-desk-monitoring.prometheusServiceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ include "service-desk-monitoring.prometheusName" . }}
+  apiGroup: rbac.authorization.k8s.io

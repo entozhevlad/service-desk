@@ -301,9 +301,12 @@ http://<VM_PUBLIC_IP>:30081
 ```bash
 helm upgrade --install service-desk-monitoring ./helm/service-desk-monitoring \
   --namespace service-desk \
-  --set-string prometheus.backendTarget=service-desk-backend.service-desk.svc.cluster.local:8000 \
   --set-string grafana.adminPassword='<change-me>'
 ```
+
+По умолчанию Prometheus в этом chart скрапит backend **по pod discovery**
+(`job="service-desk-backend-pods"`), поэтому в Grafana можно явно показать
+метрики в разрезе pod.
 
 Проверка:
 
@@ -336,10 +339,11 @@ Backend отдает метрики на `GET /metrics`.
 Примеры PromQL:
 
 ```promql
-sum(rate(http_requests_total[1m]))
-sum(rate(http_requests_total{handler="/ticket",method="POST",status=~"2.."}[5m]))
-sum(increase(http_requests_total{handler="/ticket",method="POST",status=~"2.."}[1h]))
-sum(rate(http_requests_total{status=~"5.."}[5m]))
+sum(rate(http_requests_total{job="service-desk-backend-pods"}[1m]))
+sum(rate(http_requests_total{job="service-desk-backend-pods",handler="/ticket",method="POST",status=~"2.."}[5m]))
+sum(increase(http_requests_total{job="service-desk-backend-pods",handler="/ticket",method="POST",status=~"2.."}[1h]))
+sum(rate(http_requests_total{job="service-desk-backend-pods",status=~"5.."}[5m]))
+sum by (pod) (rate(http_requests_total{job="service-desk-backend-pods"}[1m]))
 ```
 
 Для лабы dashboard по созданию заявок обычно не обязателен, но это сильный
