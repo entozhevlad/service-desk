@@ -13,10 +13,13 @@ spec:
       app.kubernetes.io/component: prometheus
   template:
     metadata:
+      annotations:
+        checksum/prometheus-config: {{ include (print $.Template.BasePath "/prometheus-configmap.yaml") . | sha256sum }}
       labels:
         {{- include "service-desk-monitoring.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: prometheus
     spec:
+      serviceAccountName: {{ include "service-desk-monitoring.prometheusServiceAccountName" . }}
       containers:
         - name: prometheus
           image: "{{ .Values.prometheus.image.repository }}:{{ .Values.prometheus.image.tag }}"

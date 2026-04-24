@@ -13,6 +13,11 @@ spec:
       app.kubernetes.io/component: grafana
   template:
     metadata:
+      annotations:
+        checksum/grafana-datasource: {{ include (print $.Template.BasePath "/grafana-datasource-configmap.yaml") . | sha256sum }}
+        checksum/grafana-dashboard-provider: {{ include (print $.Template.BasePath "/grafana-dashboard-provider-configmap.yaml") . | sha256sum }}
+        checksum/grafana-dashboard: {{ include (print $.Template.BasePath "/grafana-dashboard-configmap.yaml") . | sha256sum }}
+        checksum/grafana-admin-secret: {{ include (print $.Template.BasePath "/grafana-secret.yaml") . | sha256sum }}
       labels:
         {{- include "service-desk-monitoring.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: grafana
