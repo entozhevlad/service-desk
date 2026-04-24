@@ -45,3 +45,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- define "service-desk-monitoring.grafanaName" -}}
 {{- printf "%s-grafana" (include "service-desk-monitoring.fullname" .) }}
 {{- end }}
+
+{{- define "service-desk-monitoring.prometheusServiceAccountName" -}}
+{{- printf "%s-sa" (include "service-desk-monitoring.prometheusName" .) }}
+{{- end }}
