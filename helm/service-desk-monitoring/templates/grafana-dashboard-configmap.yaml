@@ -15,6 +15,22 @@ data:
       "schemaVersion": 39,
       "version": 1,
       "refresh": "10s",
+      "templating": {
+        "list": [
+          {
+            "name": "namespace",
+            "type": "query",
+            "datasource": "Prometheus",
+            "query": "label_values(http_requests_total{job=\"service-desk-backend-pods\"}, namespace)",
+            "includeAll": true,
+            "multi": false,
+            "current": {
+              "text": "All",
+              "value": "$__all"
+            }
+          }
+        ]
+      },
       "panels": [
         {
           "id": 1,
@@ -24,7 +40,7 @@ data:
           "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
           "targets": [
             {
-              "expr": "sum(rate(http_requests_total{job=\"service-desk-backend-pods\"}[1m]))",
+              "expr": "sum(rate(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\"}[1m]))",
               "legendFormat": "rps",
               "refId": "A"
             }
@@ -38,7 +54,7 @@ data:
           "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
           "targets": [
             {
-              "expr": "sum(rate(http_requests_total{job=\"service-desk-backend-pods\",handler=\"/ticket\",method=\"POST\",status=~\"2..\"}[5m]))",
+              "expr": "sum(rate(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",handler=\"/ticket\",method=\"POST\",status=~\"2..\"}[5m]))",
               "legendFormat": "ticket_create_rps",
               "refId": "A"
             }
@@ -52,7 +68,7 @@ data:
           "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
           "targets": [
             {
-              "expr": "sum(increase(http_requests_total{job=\"service-desk-backend-pods\",handler=\"/ticket\",method=\"POST\",status=~\"2..\"}[1h]))",
+              "expr": "sum(increase(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",handler=\"/ticket\",method=\"POST\",status=~\"2..\"}[1h]))",
               "refId": "A"
             }
           ],
@@ -75,7 +91,7 @@ data:
           "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
           "targets": [
             {
-              "expr": "sum(rate(http_requests_total{job=\"service-desk-backend-pods\",status=~\"5..\"}[5m]))",
+              "expr": "sum(rate(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",status=~\"5..\"}[5m]))",
               "legendFormat": "5xx_rps",
               "refId": "A"
             }
@@ -89,8 +105,8 @@ data:
           "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16},
           "targets": [
             {
-              "expr": "sum by (pod) (rate(http_requests_total{job=\"service-desk-backend-pods\"}[1m]))",
-              "legendFormat": "{{`{{pod}}`}}",
+              "expr": "sum by (namespace, pod) (rate(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\"}[1m]))",
+              "legendFormat": "{{`{{namespace}}`}} / {{`{{pod}}`}}",
               "refId": "A"
             }
           ]
