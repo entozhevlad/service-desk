@@ -28,6 +28,18 @@ data:
               "text": "All",
               "value": "$__all"
             }
+          },
+          {
+            "name": "pod",
+            "type": "query",
+            "datasource": "Prometheus",
+            "query": "label_values(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\"}, pod)",
+            "includeAll": true,
+            "multi": false,
+            "current": {
+              "text": "All",
+              "value": "$__all"
+            }
           }
         ]
       },
@@ -40,7 +52,7 @@ data:
           "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
           "targets": [
             {
-              "expr": "sum(rate(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\"}[1m]))",
+              "expr": "sum(rate(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",pod=~\"$pod\"}[1m]))",
               "legendFormat": "rps",
               "refId": "A"
             }
@@ -54,7 +66,7 @@ data:
           "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
           "targets": [
             {
-              "expr": "sum(rate(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",handler=\"/ticket\",method=\"POST\",status=~\"2..\"}[5m]))",
+              "expr": "sum(rate(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",pod=~\"$pod\",handler=\"/ticket\",method=\"POST\",status=~\"2..\"}[5m]))",
               "legendFormat": "ticket_create_rps",
               "refId": "A"
             }
@@ -68,7 +80,7 @@ data:
           "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
           "targets": [
             {
-              "expr": "sum(increase(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",handler=\"/ticket\",method=\"POST\",status=~\"2..\"}[1h]))",
+              "expr": "sum(increase(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",pod=~\"$pod\",handler=\"/ticket\",method=\"POST\",status=~\"2..\"}[1h]))",
               "refId": "A"
             }
           ],
@@ -91,7 +103,7 @@ data:
           "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
           "targets": [
             {
-              "expr": "sum(rate(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",status=~\"5..\"}[5m]))",
+              "expr": "sum(rate(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",pod=~\"$pod\",status=~\"5..\"}[5m]))",
               "legendFormat": "5xx_rps",
               "refId": "A"
             }
@@ -105,7 +117,7 @@ data:
           "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16},
           "targets": [
             {
-              "expr": "sum by (namespace, pod) (rate(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\"}[1m]))",
+              "expr": "sum by (namespace, pod) (rate(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",pod=~\"$pod\"}[1m]))",
               "legendFormat": "{{`{{namespace}}`}} / {{`{{pod}}`}}",
               "refId": "A"
             }
