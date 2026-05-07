@@ -25,6 +25,7 @@ concurrency:
 jobs:
   helm-lint:
     runs-on: ubuntu-latest
+    needs: [frontend-build]
     steps:
       - uses: actions/checkout@v4
 
@@ -41,7 +42,7 @@ jobs:
 
   backend-lint:
     runs-on: ubuntu-latest
-    needs: [backend-build]
+    needs: [frontend-build]
     defaults:
       run:
         working-directory: src/backend
@@ -73,7 +74,6 @@ jobs:
 
   backend-tests:
     runs-on: ubuntu-latest
-    needs: [backend-build]
     defaults:
       run:
         working-directory: src/backend
@@ -99,6 +99,7 @@ jobs:
 
   backend-build:
     runs-on: ubuntu-latest
+    needs: [backend-tests]
     steps:
       - uses: actions/checkout@v4
 
@@ -108,7 +109,7 @@ jobs:
   frontend-test:
     name: Frontend - tests
     runs-on: ubuntu-latest
-    needs: [frontend-build]
+    needs: [backend-build]
     defaults:
       run:
         working-directory: src/frontend
@@ -132,6 +133,7 @@ jobs:
   frontend-build:
     name: Frontend - build
     runs-on: ubuntu-latest
+    needs: [frontend-test]
 
     steps:
       - uses: actions/checkout@v4
@@ -156,7 +158,7 @@ jobs:
   backend-image-publish:
     name: Backend - build and push image
     runs-on: ubuntu-latest
-    needs: [backend-lint, backend-tests]
+    needs: [helm-lint, backend-lint]
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
 
     steps:
@@ -190,7 +192,7 @@ jobs:
   frontend-image-publish:
     name: Frontend - build and push image
     runs-on: ubuntu-latest
-    needs: [frontend-test]
+    needs: [helm-lint, backend-lint]
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
 
     steps:
