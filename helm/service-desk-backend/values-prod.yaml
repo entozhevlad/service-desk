@@ -1,0 +1,16 @@
+image:
+  repository: docker.io/zjozjyr/service-desk-backend
+  tag: latest
+
+imagePullSecrets: []
+
+env:
+  APP_ENV: "prod"
+  UVICORN_RELOAD: "0"
+  RUN_MIGRATIONS: "1"
+  POSTGRES_HOST: "service-desk-postgresql"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "service_desk"
+  POSTGRES_USER: "service_desk"
+
+existingSecretName: "service-desk-backend-env"
