@@ -1,0 +1,10 @@
+prometheus:
+  retention: 24h
+
+grafana:
+  adminUser: admin
+  adminPassword: change-me
+  service:
+    type: NodePort
+    port: 3000
+    nodePort: 30300

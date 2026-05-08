@@ -1,0 +1,12 @@
+image:
+  repository: docker.io/aliquis21/service-desk-frontend
+  tag: latest
+
+backend:
+  serviceName: service-desk-backend
+  servicePort: 8000
+
+service:
+  type: NodePort
+  port: 80
+  nodePort: 30081
