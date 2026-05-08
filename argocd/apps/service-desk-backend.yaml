@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: service-desk-backend
+  namespace: argocd
+spec:
+  project: service-desk
+  source:
+    repoURL: https://github.com/entozhevlad/service-desk.git
+    targetRevision: main
+    path: helm/service-desk-backend
+    helm:
+      valueFiles:
+        - values-prod.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: service-desk
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
