@@ -29,6 +29,19 @@ data:
               "text": "All",
               "value": "$__all"
             }
+          },
+          {
+            "name": "pod",
+            "type": "query",
+            "datasource": "Prometheus",
+            "query": "label_values(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\"}, pod)",
+            "includeAll": true,
+            "multi": true,
+            "refresh": 2,
+            "current": {
+              "text": "All",
+              "value": "$__all"
+            }
           }
         ]
       },
@@ -69,7 +82,7 @@ data:
           "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
           "targets": [
             {
-              "expr": "sum(increase(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",handler=\"/ticket\",method=\"POST\",status=~\"2..\"}[1h]))",
+              "expr": "round(sum(increase(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",handler=\"/ticket\",method=\"POST\",status=~\"2..\"}[1h])))",
               "refId": "A"
             }
           ],
@@ -103,11 +116,39 @@ data:
           "title": "HTTP RPS by Namespace",
           "type": "timeseries",
           "datasource": "Prometheus",
-          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16},
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
           "targets": [
             {
               "expr": "sum by (namespace) (rate(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\"}[1m]))",
               "legendFormat": "{{`{{namespace}}`}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "title": "HTTP RPS by Pod",
+          "type": "timeseries",
+          "datasource": "Prometheus",
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+          "targets": [
+            {
+              "expr": "sum by (pod) (rate(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",pod=~\"$pod\"}[1m]))",
+              "legendFormat": "{{`{{pod}}`}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "title": "5xx by Pod",
+          "type": "timeseries",
+          "datasource": "Prometheus",
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 24},
+          "targets": [
+            {
+              "expr": "sum by (pod) (rate(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",pod=~\"$pod\",status=~\"5..\"}[5m]))",
+              "legendFormat": "{{`{{pod}}`}}",
               "refId": "A"
             }
           ]
