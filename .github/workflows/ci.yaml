@@ -79,6 +79,7 @@ jobs:
   frontend-test:
     name: Frontend - tests
     runs-on: ubuntu-latest
+    needs: [backend-tests]
     defaults:
       run:
         working-directory: src/frontend
@@ -108,7 +109,7 @@ jobs:
   frontend-build:
     name: Frontend - build
     runs-on: ubuntu-latest
-    needs: [frontend-test]
+    needs: [backend-build]
     steps:
       - uses: actions/checkout@v4
 
@@ -148,7 +149,7 @@ jobs:
 
   backend-lint:
     runs-on: ubuntu-latest
-    needs: [backend-tests, frontend-test]
+    needs: [frontend-test]
     defaults:
       run:
         working-directory: src/backend
@@ -181,7 +182,7 @@ jobs:
   backend-image-publish:
     name: Backend - build and push image
     runs-on: ubuntu-latest
-    needs: [backend-build]
+    needs: [helm-lint]
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
@@ -214,7 +215,7 @@ jobs:
   frontend-image-publish:
     name: Frontend - build and push image
     runs-on: ubuntu-latest
-    needs: [frontend-build, backend-image-publish]
+    needs: [backend-image-publish]
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
