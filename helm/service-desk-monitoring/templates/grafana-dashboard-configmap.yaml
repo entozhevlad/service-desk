@@ -54,7 +54,7 @@ data:
           "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
           "targets": [
             {
-              "expr": "sum(rate(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\"}[1m]))",
+              "expr": "sum(rate(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",pod=~\"$pod\"}[1m]))",
               "legendFormat": "rps",
               "refId": "A"
             }
@@ -68,7 +68,7 @@ data:
           "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
           "targets": [
             {
-              "expr": "sum(rate(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",handler=\"/ticket\",method=\"POST\",status=~\"2..\"}[5m]))",
+              "expr": "sum(rate(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",pod=~\"$pod\",handler=\"/ticket\",method=\"POST\",status=~\"2..\"}[5m]))",
               "legendFormat": "ticket_create_rps",
               "refId": "A"
             }
@@ -82,7 +82,7 @@ data:
           "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
           "targets": [
             {
-              "expr": "round(sum(increase(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",handler=\"/ticket\",method=\"POST\",status=~\"2..\"}[1h])))",
+              "expr": "round(sum(increase(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",pod=~\"$pod\",handler=\"/ticket\",method=\"POST\",status=~\"2..\"}[1h])))",
               "refId": "A"
             }
           ],
@@ -105,7 +105,7 @@ data:
           "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
           "targets": [
             {
-              "expr": "sum(rate(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",status=~\"5..\"}[5m]))",
+              "expr": "sum(rate(http_requests_total{job=\"service-desk-backend-pods\",namespace=~\"$namespace\",pod=~\"$pod\",status=~\"5..\"}[5m]))",
               "legendFormat": "5xx_rps",
               "refId": "A"
             }
