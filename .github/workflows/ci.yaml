@@ -250,7 +250,15 @@ jobs:
   notify-telegram:
     name: Notify Telegram
     runs-on: ubuntu-latest
-    needs: [frontend-image-publish]
+    needs:
+      - backend-tests
+      - frontend-test
+      - backend-lint
+      - backend-build
+      - frontend-build
+      - helm-lint
+      - backend-image-publish
+      - frontend-image-publish
     if: always()
     steps:
       - uses: actions/checkout@v4
@@ -272,6 +280,38 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           GITHUB_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           PIPELINE_STATUS: ${{ contains(needs.*.result, 'failure') && 'failure' || contains(needs.*.result, 'cancelled') && 'cancelled' || 'success' }}
+          BACKEND_TESTS_RESULT: ${{ needs.backend-tests.result }}
+          FRONTEND_TEST_RESULT: ${{ needs.frontend-test.result }}
+          BACKEND_LINT_RESULT: ${{ needs.backend-lint.result }}
+          BACKEND_BUILD_RESULT: ${{ needs.backend-build.result }}
+          FRONTEND_BUILD_RESULT: ${{ needs.frontend-build.result }}
+          HELM_LINT_RESULT: ${{ needs.helm-lint.result }}
+          BACKEND_IMAGE_PUBLISH_RESULT: ${{ needs.backend-image-publish.result }}
+          FRONTEND_IMAGE_PUBLISH_RESULT: ${{ needs.frontend-image-publish.result }}
         run: |
+          failed_jobs=()
+          [ "${BACKEND_TESTS_RESULT}" = "failure" ] && failed_jobs+=("backend-tests")
+          [ "${FRONTEND_TEST_RESULT}" = "failure" ] && failed_jobs+=("frontend-test")
+          [ "${BACKEND_LINT_RESULT}" = "failure" ] && failed_jobs+=("backend-lint")
+          [ "${BACKEND_BUILD_RESULT}" = "failure" ] && failed_jobs+=("backend-build")
+          [ "${FRONTEND_BUILD_RESULT}" = "failure" ] && failed_jobs+=("frontend-build")
+          [ "${HELM_LINT_RESULT}" = "failure" ] && failed_jobs+=("helm-lint")
+          [ "${BACKEND_IMAGE_PUBLISH_RESULT}" = "failure" ] && failed_jobs+=("backend-image-publish")
+          [ "${FRONTEND_IMAGE_PUBLISH_RESULT}" = "failure" ] && failed_jobs+=("frontend-image-publish")
+
+          message_override=""
+          if [ "${#failed_jobs[@]}" -gt 0 ]; then
+            failed_list="$(IFS=,; echo "${failed_jobs[*]}")"
+            message_override=$'CI/CD status: FAILURE\n'
+            message_override+=$'Repository: '"${{ github.repository }}"$'\n'
+            message_override+=$'Workflow: '"${{ github.workflow }}"$'\n'
+            message_override+=$'Branch: '"${{ github.ref_name }}"$'\n'
+            message_override+=$'Commit: '"${{ github.sha }}"$'\n'
+            message_override+=$'Failed jobs: '"${failed_list}"$'\n'
+            message_override+=$'Run: '"${GITHUB_RUN_URL}"
+          fi
+
           uv sync --project alerts --python 3.12
-          uv run --project alerts --python 3.12 python alerts/telegram_notifier.py --status "${PIPELINE_STATUS}"
+          uv run --project alerts --python 3.12 python alerts/telegram_notifier.py \
+            --status "${PIPELINE_STATUS}" \
+            --message "${message_override}"
