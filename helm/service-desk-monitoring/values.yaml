@@ -32,14 +32,25 @@ grafana:
     pullPolicy: IfNotPresent
   adminUser: admin
   adminPassword: admin
+  persistence:
+    enabled: true
+    size: 2Gi
+    storageClassName: ""
+  database:
+    type: sqlite
+    host: service-desk-postgresql.service-desk.svc.cluster.local:5432
+    name: grafana
+    user: grafana
+    password: change-me
+    sslMode: disable
   service:
     type: NodePort
     port: 3000
     nodePort: 30300
   resources:
     requests:
-      cpu: 50m
-      memory: 128Mi
-    limits:
-      cpu: 300m
+      cpu: 100m
       memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
