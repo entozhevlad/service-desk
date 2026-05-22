@@ -38,3 +38,4 @@ Thumbs.db
 infra/terraform
 ansible/group_vars/app.yaml
 ansible/inventory.ini
+.scannerwork

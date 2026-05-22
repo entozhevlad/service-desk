@@ -151,16 +151,16 @@ const modalTitle = computed(() => (editId.value === null ? "Create ticket" : "Ed
       <div class="control-row">
         <div class="controls-left">
           <div class="field">
-            <label>Status</label>
-            <select v-model="statusFilter">
+            <label for="status-filter">Status</label>
+            <select id="status-filter" v-model="statusFilter">
               <option value="">All</option>
               <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
             </select>
           </div>
 
           <div class="field">
-            <label>Priority</label>
-            <select v-model="priorityFilter">
+            <label for="priority-filter">Priority</label>
+            <select id="priority-filter" v-model="priorityFilter">
               <option value="">All</option>
               <option v-for="p in priorities" :key="p" :value="p">{{ p }}</option>
             </select>
@@ -179,6 +179,9 @@ const modalTitle = computed(() => (editId.value === null ? "Create ticket" : "Ed
 
         <div v-else class="table-wrap">
           <table>
+            <caption style="position: absolute; left: -9999px;">
+              Service desk tickets list with status, priority and actions
+            </caption>
             <thead>
             <tr>
               <th style="width: 80px">ID</th>
@@ -269,13 +272,14 @@ const modalTitle = computed(() => (editId.value === null ? "Create ticket" : "Ed
 
         <div style="display: grid; gap: 12px">
           <div>
-            <label class="subtle" style="display:block; margin-bottom: 6px">Title</label>
-            <input v-model="formTitle" style="width: 100%" placeholder="e.g. Can't login" />
+            <label for="ticket-title" class="subtle" style="display:block; margin-bottom: 6px">Title</label>
+            <input id="ticket-title" v-model="formTitle" style="width: 100%" placeholder="e.g. Can't login" />
           </div>
 
           <div>
-            <label class="subtle" style="display:block; margin-bottom: 6px">Description</label>
+            <label for="ticket-description" class="subtle" style="display:block; margin-bottom: 6px">Description</label>
             <textarea
+              id="ticket-description"
               v-model="formDescription"
               rows="4"
               style="width: 100%"
@@ -285,15 +289,15 @@ const modalTitle = computed(() => (editId.value === null ? "Create ticket" : "Ed
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
             <div>
-              <label class="subtle" style="display:block; margin-bottom: 6px">Priority</label>
-              <select v-model="formPriority" style="width: 100%">
+              <label for="ticket-priority" class="subtle" style="display:block; margin-bottom: 6px">Priority</label>
+              <select id="ticket-priority" v-model="formPriority" style="width: 100%">
                 <option v-for="p in priorities" :key="p" :value="p">{{ p }}</option>
               </select>
             </div>
 
             <div>
-              <label class="subtle" style="display:block; margin-bottom: 6px">Status</label>
-              <select v-model="formStatus" style="width: 100%">
+              <label for="ticket-status" class="subtle" style="display:block; margin-bottom: 6px">Status</label>
+              <select id="ticket-status" v-model="formStatus" style="width: 100%">
                 <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
               </select>
             </div>

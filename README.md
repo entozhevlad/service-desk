@@ -348,3 +348,15 @@ sum by (pod) (rate(http_requests_total{job="service-desk-backend-pods"}[1m]))
 
 Для лабы dashboard по созданию заявок обычно не обязателен, но это сильный
 плюс на защите: видно и бизнес-метрику, и техническое состояние API.
+
+### Telegram alerts для CI/CD
+
+В проект добавлен Python-нотификатор:
+
+- `alerts/telegram_notifier.py`
+- `alerts/pyproject.toml`
+- `alerts/README.md`
+
+Он отправляет в Telegram статус pipeline/job (success/failure/cancelled) и
+ссылку на run в GitHub Actions.
+Для локальной настройки используй `alerts/.env` (шаблон `alerts/.env.example`).
