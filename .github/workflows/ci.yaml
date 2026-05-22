@@ -51,9 +51,11 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
+        id: deps
         run: uv sync --frozen || uv sync
 
       - name: Unit tests with coverage gate
+        id: tests
         run: >
           uv run pytest tests/unit
           --cov=app
@@ -62,11 +64,27 @@ jobs:
           --cov-fail-under=80
 
       - name: Upload backend coverage
+        id: upload_backend_cov
         uses: actions/upload-artifact@v4
         with:
           name: backend-coverage
           path: src/backend/coverage.xml
           if-no-files-found: error
+
+      - name: Notify backend-tests steps
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          msg="backend-tests\n"
+          msg+="deps: ${{ steps.deps.outcome }}\n"
+          msg+="tests: ${{ steps.tests.outcome }}\n"
+          msg+="upload_backend_coverage: ${{ steps.upload_backend_cov.outcome }}\n"
+          msg+="job: ${{ job.status }}"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            --data-urlencode text="$msg" >/dev/null
 
   backend-build:
     runs-on: ubuntu-latest
@@ -75,7 +93,19 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build backend image
+        id: build_backend
         run: docker build -f src/backend/Dockerfile -t service-desk-backend:ci src/backend
+
+      - name: Notify backend-build steps
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          msg="backend-build\n"
+          msg+="build_backend: ${{ steps.build_backend.outcome }}\n"
+          msg+="job: ${{ job.status }}"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" -d chat_id="${TELEGRAM_CHAT_ID}" --data-urlencode text="$msg" >/dev/null
 
   frontend-test:
     name: Frontend - tests
@@ -95,17 +125,33 @@ jobs:
           cache-dependency-path: src/frontend/package-lock.json
 
       - name: Install deps
+        id: npm_install
         run: npm ci
 
       - name: Unit tests with coverage gate
+        id: frontend_tests
         run: npm run test:coverage
 
       - name: Upload frontend coverage
+        id: upload_frontend_cov
         uses: actions/upload-artifact@v4
         with:
           name: frontend-coverage
           path: src/frontend/coverage/lcov.info
           if-no-files-found: error
+
+      - name: Notify frontend-test steps
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          msg="frontend-test\n"
+          msg+="npm_install: ${{ steps.npm_install.outcome }}\n"
+          msg+="frontend_tests: ${{ steps.frontend_tests.outcome }}\n"
+          msg+="upload_frontend_coverage: ${{ steps.upload_frontend_cov.outcome }}\n"
+          msg+="job: ${{ job.status }}"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" -d chat_id="${TELEGRAM_CHAT_ID}" --data-urlencode text="$msg" >/dev/null
 
   frontend-build:
     name: Frontend - build
@@ -115,9 +161,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build frontend image
+        id: build_frontend
         run: docker build -f src/frontend/Dockerfile --build-arg VITE_API_BASE_URL=/api -t service-desk-frontend:ci src/frontend
 
       - name: Extract dist artifact
+        id: extract_dist
         run: |
           docker create --name frontend-dist service-desk-frontend:ci
           mkdir -p src/frontend/dist
@@ -125,11 +173,25 @@ jobs:
           docker rm frontend-dist
 
       - name: Upload dist artifact
+        id: upload_dist
         uses: actions/upload-artifact@v4
         with:
           name: frontend-dist
           path: src/frontend/dist
           if-no-files-found: error
+
+      - name: Notify frontend-build steps
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          msg="frontend-build\n"
+          msg+="build_frontend: ${{ steps.build_frontend.outcome }}\n"
+          msg+="extract_dist: ${{ steps.extract_dist.outcome }}\n"
+          msg+="upload_dist: ${{ steps.upload_dist.outcome }}\n"
+          msg+="job: ${{ job.status }}"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" -d chat_id="${TELEGRAM_CHAT_ID}" --data-urlencode text="$msg" >/dev/null
 
   helm-lint:
     runs-on: ubuntu-latest
@@ -143,10 +205,22 @@ jobs:
           version: v3.15.4
 
       - name: Helm lint
+        id: helm_lint_step
         run: |
           helm lint helm/service-desk-backend
           helm lint helm/service-desk-frontend
           helm lint helm/service-desk-monitoring
+
+      - name: Notify helm-lint steps
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          msg="helm-lint\n"
+          msg+="helm_lint: ${{ steps.helm_lint_step.outcome }}\n"
+          msg+="job: ${{ job.status }}"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" -d chat_id="${TELEGRAM_CHAT_ID}" --data-urlencode text="$msg" >/dev/null
 
   backend-lint:
     runs-on: ubuntu-latest
@@ -168,16 +242,34 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
+        id: deps
         run: uv sync --frozen || uv sync
 
       - name: isort (check)
+        id: isort
         run: uv run isort --check-only app
 
       - name: flake8
+        id: flake8
         run: uv run flake8 app
 
       - name: mypy
+        id: mypy
         run: uv run mypy app
+
+      - name: Notify backend-lint steps
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          msg="backend-lint\n"
+          msg+="deps: ${{ steps.deps.outcome }}\n"
+          msg+="isort: ${{ steps.isort.outcome }}\n"
+          msg+="flake8: ${{ steps.flake8.outcome }}\n"
+          msg+="mypy: ${{ steps.mypy.outcome }}\n"
+          msg+="job: ${{ job.status }}"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" -d chat_id="${TELEGRAM_CHAT_ID}" --data-urlencode text="$msg" >/dev/null
 
   backend-image-publish:
     name: Backend - build and push image
@@ -196,6 +288,7 @@ jobs:
           echo "value=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to cloud registry
+        id: docker_login
         uses: docker/login-action@v3
         with:
           registry: ${{ vars.REGISTRY_HOST }}
@@ -203,6 +296,7 @@ jobs:
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - name: Build and push backend image
+        id: build_push_backend
         uses: docker/build-push-action@v6
         with:
           context: src/backend
@@ -211,6 +305,18 @@ jobs:
           tags: |
             ${{ vars.BACKEND_IMAGE_REPOSITORY }}:${{ steps.image_tag.outputs.value }}
             ${{ vars.BACKEND_IMAGE_REPOSITORY }}:latest
+
+      - name: Notify backend-image-publish steps
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          msg="backend-image-publish\n"
+          msg+="docker_login: ${{ steps.docker_login.outcome }}\n"
+          msg+="build_push_backend: ${{ steps.build_push_backend.outcome }}\n"
+          msg+="job: ${{ job.status }}"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" -d chat_id="${TELEGRAM_CHAT_ID}" --data-urlencode text="$msg" >/dev/null
 
   frontend-image-publish:
     name: Frontend - build and push image
@@ -229,6 +335,7 @@ jobs:
           echo "value=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to cloud registry
+        id: docker_login
         uses: docker/login-action@v3
         with:
           registry: ${{ vars.REGISTRY_HOST }}
@@ -236,6 +343,7 @@ jobs:
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - name: Build and push frontend image
+        id: build_push_frontend
         uses: docker/build-push-action@v6
         with:
           context: src/frontend
@@ -246,6 +354,18 @@ jobs:
           tags: |
             ${{ vars.FRONTEND_IMAGE_REPOSITORY }}:${{ steps.image_tag.outputs.value }}
             ${{ vars.FRONTEND_IMAGE_REPOSITORY }}:latest
+
+      - name: Notify frontend-image-publish steps
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          msg="frontend-image-publish\n"
+          msg+="docker_login: ${{ steps.docker_login.outcome }}\n"
+          msg+="build_push_frontend: ${{ steps.build_push_frontend.outcome }}\n"
+          msg+="job: ${{ job.status }}"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" -d chat_id="${TELEGRAM_CHAT_ID}" --data-urlencode text="$msg" >/dev/null
 
   notify-telegram:
     name: Notify Telegram
