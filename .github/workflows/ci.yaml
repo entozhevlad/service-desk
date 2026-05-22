@@ -80,12 +80,11 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           JOB_NAME: backend-tests
-          STEPS_JSON: ${{ toJson(steps) }}
         run: |
-          echo "$STEPS_JSON" | jq -r 'to_entries[] | "\(.key)	\(.value.outcome // "unknown")"' | while IFS=$'	' read -r step_id outcome; do
-            msg="${JOB_NAME} / ${step_id}: ${outcome}"
-            curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage"               -d chat_id="${TELEGRAM_CHAT_ID}"               --data-urlencode text="$msg" >/dev/null
-          done
+          msg="${JOB_NAME}: ${{ job.status }}"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            --data-urlencode text="$msg" >/dev/null
 
   backend-build:
     runs-on: ubuntu-latest
@@ -104,12 +103,11 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           JOB_NAME: backend-build
-          STEPS_JSON: ${{ toJson(steps) }}
         run: |
-          echo "$STEPS_JSON" | jq -r 'to_entries[] | "\(.key)	\(.value.outcome // "unknown")"' | while IFS=$'	' read -r step_id outcome; do
-            msg="${JOB_NAME} / ${step_id}: ${outcome}"
-            curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage"               -d chat_id="${TELEGRAM_CHAT_ID}"               --data-urlencode text="$msg" >/dev/null
-          done
+          msg="${JOB_NAME}: ${{ job.status }}"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            --data-urlencode text="$msg" >/dev/null
 
   frontend-test:
     name: Frontend - tests
@@ -152,12 +150,11 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           JOB_NAME: frontend-test
-          STEPS_JSON: ${{ toJson(steps) }}
         run: |
-          echo "$STEPS_JSON" | jq -r 'to_entries[] | "\(.key)	\(.value.outcome // "unknown")"' | while IFS=$'	' read -r step_id outcome; do
-            msg="${JOB_NAME} / ${step_id}: ${outcome}"
-            curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage"               -d chat_id="${TELEGRAM_CHAT_ID}"               --data-urlencode text="$msg" >/dev/null
-          done
+          msg="${JOB_NAME}: ${{ job.status }}"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            --data-urlencode text="$msg" >/dev/null
 
   frontend-build:
     name: Frontend - build
@@ -193,12 +190,11 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           JOB_NAME: frontend-build
-          STEPS_JSON: ${{ toJson(steps) }}
         run: |
-          echo "$STEPS_JSON" | jq -r 'to_entries[] | "\(.key)	\(.value.outcome // "unknown")"' | while IFS=$'	' read -r step_id outcome; do
-            msg="${JOB_NAME} / ${step_id}: ${outcome}"
-            curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage"               -d chat_id="${TELEGRAM_CHAT_ID}"               --data-urlencode text="$msg" >/dev/null
-          done
+          msg="${JOB_NAME}: ${{ job.status }}"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            --data-urlencode text="$msg" >/dev/null
 
   helm-lint:
     runs-on: ubuntu-latest
@@ -226,12 +222,11 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           JOB_NAME: helm-lint
-          STEPS_JSON: ${{ toJson(steps) }}
         run: |
-          echo "$STEPS_JSON" | jq -r 'to_entries[] | "\(.key)	\(.value.outcome // "unknown")"' | while IFS=$'	' read -r step_id outcome; do
-            msg="${JOB_NAME} / ${step_id}: ${outcome}"
-            curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage"               -d chat_id="${TELEGRAM_CHAT_ID}"               --data-urlencode text="$msg" >/dev/null
-          done
+          msg="${JOB_NAME}: ${{ job.status }}"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            --data-urlencode text="$msg" >/dev/null
 
   backend-lint:
     runs-on: ubuntu-latest
@@ -277,12 +272,11 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           JOB_NAME: backend-lint
-          STEPS_JSON: ${{ toJson(steps) }}
         run: |
-          echo "$STEPS_JSON" | jq -r 'to_entries[] | "\(.key)	\(.value.outcome // "unknown")"' | while IFS=$'	' read -r step_id outcome; do
-            msg="${JOB_NAME} / ${step_id}: ${outcome}"
-            curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage"               -d chat_id="${TELEGRAM_CHAT_ID}"               --data-urlencode text="$msg" >/dev/null
-          done
+          msg="${JOB_NAME}: ${{ job.status }}"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            --data-urlencode text="$msg" >/dev/null
 
   backend-image-publish:
     name: Backend - build and push image
@@ -327,12 +321,11 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           JOB_NAME: backend-image-publish
-          STEPS_JSON: ${{ toJson(steps) }}
         run: |
-          echo "$STEPS_JSON" | jq -r 'to_entries[] | "\(.key)	\(.value.outcome // "unknown")"' | while IFS=$'	' read -r step_id outcome; do
-            msg="${JOB_NAME} / ${step_id}: ${outcome}"
-            curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage"               -d chat_id="${TELEGRAM_CHAT_ID}"               --data-urlencode text="$msg" >/dev/null
-          done
+          msg="${JOB_NAME}: ${{ job.status }}"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            --data-urlencode text="$msg" >/dev/null
 
   frontend-image-publish:
     name: Frontend - build and push image
@@ -379,12 +372,11 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           JOB_NAME: frontend-image-publish
-          STEPS_JSON: ${{ toJson(steps) }}
         run: |
-          echo "$STEPS_JSON" | jq -r 'to_entries[] | "\(.key)	\(.value.outcome // "unknown")"' | while IFS=$'	' read -r step_id outcome; do
-            msg="${JOB_NAME} / ${step_id}: ${outcome}"
-            curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage"               -d chat_id="${TELEGRAM_CHAT_ID}"               --data-urlencode text="$msg" >/dev/null
-          done
+          msg="${JOB_NAME}: ${{ job.status }}"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            --data-urlencode text="$msg" >/dev/null
 
   notify-telegram:
     name: Notify Telegram
