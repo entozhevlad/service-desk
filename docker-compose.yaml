@@ -50,7 +50,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "${FRONTEND_PORT:-8081}:80"
+      - "${FRONTEND_PORT:-8081}:8080"
 
 volumes:
   pgdata:

@@ -126,4 +126,40 @@ describe("TicketListView", () => {
     expect(putCall[0]).toContain("/tickets/1");
     expect(JSON.parse(putCall[1].body)).toEqual({ status: "done" });
   });
+
+  it("renders table caption for accessibility", async () => {
+    mockFetchSequence([{ body: [ticket] }]);
+
+    const wrapper = mount(TicketListView);
+    await flushPromises();
+
+    const caption = wrapper.find("table caption");
+    expect(caption.exists()).toBe(true);
+    expect(caption.text()).toContain("Service desk tickets list");
+  });
+
+  it("associates labels with controls in filters and modal", async () => {
+    mockFetchSequence([{ body: [ticket] }]);
+
+    const wrapper = mount(TicketListView);
+    await flushPromises();
+
+    expect(wrapper.find('label[for="status-filter"]').exists()).toBe(true);
+    expect(wrapper.find("#status-filter").exists()).toBe(true);
+    expect(wrapper.find('label[for="priority-filter"]').exists()).toBe(true);
+    expect(wrapper.find("#priority-filter").exists()).toBe(true);
+
+    const openCreateButton = wrapper.findAll("button").find((b) => b.text().includes("Create ticket"));
+    await openCreateButton?.trigger("click");
+    await flushPromises();
+
+    expect(wrapper.find('label[for="ticket-title"]').exists()).toBe(true);
+    expect(wrapper.find("#ticket-title").exists()).toBe(true);
+    expect(wrapper.find('label[for="ticket-description"]').exists()).toBe(true);
+    expect(wrapper.find("#ticket-description").exists()).toBe(true);
+    expect(wrapper.find('label[for="ticket-priority"]').exists()).toBe(true);
+    expect(wrapper.find("#ticket-priority").exists()).toBe(true);
+    expect(wrapper.find('label[for="ticket-status"]').exists()).toBe(true);
+    expect(wrapper.find("#ticket-status").exists()).toBe(true);
+  });
 });
