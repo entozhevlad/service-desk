@@ -70,7 +70,7 @@ jobs:
 
   backend-build:
     runs-on: ubuntu-latest
-    needs: [frontend-test]
+    needs: [backend-tests]
     steps:
       - uses: actions/checkout@v4
 
@@ -80,7 +80,7 @@ jobs:
   frontend-test:
     name: Frontend - tests
     runs-on: ubuntu-latest
-    needs: [backend-tests]
+    needs: [backend-build]
     defaults:
       run:
         working-directory: src/frontend
@@ -246,3 +246,35 @@ jobs:
           tags: |
             ${{ vars.FRONTEND_IMAGE_REPOSITORY }}:${{ steps.image_tag.outputs.value }}
             ${{ vars.FRONTEND_IMAGE_REPOSITORY }}:latest
+
+  gitops-update:
+    name: GitOps - update Helm values for Argo CD
+    runs-on: ubuntu-latest
+    needs: [frontend-image-publish]
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update backend image in values-prod
+        run: |
+          sed -i -E "s|^([[:space:]]*repository:[[:space:]]*).*$|\1${{ vars.BACKEND_IMAGE_REPOSITORY }}|" helm/service-desk-backend/values-prod.yaml
+          sed -i -E "s|^([[:space:]]*tag:[[:space:]]*).*$|\1${GITHUB_SHA}|" helm/service-desk-backend/values-prod.yaml
+
+      - name: Update frontend image in values-prod
+        run: |
+          sed -i -E "s|^([[:space:]]*repository:[[:space:]]*).*$|\1${{ vars.FRONTEND_IMAGE_REPOSITORY }}|" helm/service-desk-frontend/values-prod.yaml
+          sed -i -E "s|^([[:space:]]*tag:[[:space:]]*).*$|\1${GITHUB_SHA}|" helm/service-desk-frontend/values-prod.yaml
+
+      - name: Commit and push manifest changes
+        run: |
+          if git diff --quiet -- helm/service-desk-backend/values-prod.yaml helm/service-desk-frontend/values-prod.yaml; then
+            echo "No manifest changes to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add helm/service-desk-backend/values-prod.yaml helm/service-desk-frontend/values-prod.yaml
+          git commit -m "ci(gitops): update image tags to ${GITHUB_SHA} [skip ci]"
+          git push
