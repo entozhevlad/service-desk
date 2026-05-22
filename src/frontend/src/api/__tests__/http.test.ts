@@ -16,14 +16,14 @@ describe("http client", () => {
     const result = await http.post("/tickets", { title: "A" });
 
     expect(result).toEqual({ ok: true });
-    expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining("/tickets"),
-      expect.objectContaining({
-        method: "POST",
-        body: JSON.stringify({ title: "A" }),
-        headers: expect.objectContaining({ "Content-Type": "application/json" }),
-      })
-    );
+    expect(fetch).toHaveBeenCalledTimes(1);
+    const [url, options] = (fetch as any).mock.calls[0];
+
+    expect(url).toContain("/tickets");
+    expect(options.method).toBe("POST");
+    expect(options.body).toBe(JSON.stringify({ title: "A" }));
+    expect(options.headers).toBeInstanceOf(Headers);
+    expect(options.headers.get("Content-Type")).toBe("application/json");
   });
 
   it("throws response text for non-OK responses", async () => {
