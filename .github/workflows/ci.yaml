@@ -8,6 +8,7 @@ on:
       - "src/frontend/**"
       - "helm/**"
       - "argocd/**"
+      - "alerts/**"
       - "sonar-project.properties"
       - "README.md"
       - ".github/workflows/ci.yaml"
@@ -17,6 +18,7 @@ on:
       - "src/frontend/**"
       - "helm/**"
       - "argocd/**"
+      - "alerts/**"
       - "sonar-project.properties"
       - "README.md"
       - ".github/workflows/ci.yaml"
@@ -278,3 +280,69 @@ jobs:
           git add helm/service-desk-backend/values-prod.yaml helm/service-desk-frontend/values-prod.yaml
           git commit -m "ci(gitops): update image tags to ${GITHUB_SHA} [skip ci]"
           git push
+
+  notify-telegram:
+    name: Notify Telegram
+    runs-on: ubuntu-latest
+    needs:
+      - backend-lint
+      - backend-tests
+      - frontend-test
+      - backend-build
+      - frontend-build
+      - helm-lint
+      - backend-image-publish
+      - frontend-image-publish
+      - gitops-update
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Send Telegram notification
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GITHUB_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PIPELINE_STATUS: ${{ contains(needs.*.result, 'failure') && 'failure' || contains(needs.*.result, 'cancelled') && 'cancelled' || 'success' }}
+          BACKEND_LINT_RESULT: ${{ needs.backend-lint.result }}
+          BACKEND_TESTS_RESULT: ${{ needs.backend-tests.result }}
+          FRONTEND_TEST_RESULT: ${{ needs.frontend-test.result }}
+          BACKEND_BUILD_RESULT: ${{ needs.backend-build.result }}
+          FRONTEND_BUILD_RESULT: ${{ needs.frontend-build.result }}
+          HELM_LINT_RESULT: ${{ needs.helm-lint.result }}
+          BACKEND_IMAGE_PUBLISH_RESULT: ${{ needs.backend-image-publish.result }}
+          FRONTEND_IMAGE_PUBLISH_RESULT: ${{ needs.frontend-image-publish.result }}
+          GITOPS_UPDATE_RESULT: ${{ needs.gitops-update.result }}
+        run: |
+          summary=$'CI/CD status: '"${PIPELINE_STATUS^^}"$'\n'
+          summary+=$'Repository: '"${{ github.repository }}"$'\n'
+          summary+=$'Workflow: '"${{ github.workflow }}"$'\n'
+          summary+=$'Branch: '"${{ github.ref_name }}"$'\n'
+          summary+=$'Commit: '"${{ github.sha }}"$'\n'
+          summary+=$'\nJobs:\n'
+          summary+=$'- backend-lint: '"${BACKEND_LINT_RESULT}"$'\n'
+          summary+=$'- backend-tests: '"${BACKEND_TESTS_RESULT}"$'\n'
+          summary+=$'- frontend-test: '"${FRONTEND_TEST_RESULT}"$'\n'
+          summary+=$'- backend-build: '"${BACKEND_BUILD_RESULT}"$'\n'
+          summary+=$'- frontend-build: '"${FRONTEND_BUILD_RESULT}"$'\n'
+          summary+=$'- helm-lint: '"${HELM_LINT_RESULT}"$'\n'
+          summary+=$'- backend-image-publish: '"${BACKEND_IMAGE_PUBLISH_RESULT}"$'\n'
+          summary+=$'- frontend-image-publish: '"${FRONTEND_IMAGE_PUBLISH_RESULT}"$'\n'
+          summary+=$'- gitops-update: '"${GITOPS_UPDATE_RESULT}"$'\n'
+          summary+=$'\nRun: '"${GITHUB_RUN_URL}"
+
+          uv sync --project alerts --python 3.12
+          uv run --project alerts --python 3.12 python alerts/telegram_notifier.py \
+            --status "${PIPELINE_STATUS}" \
+            --message "${summary}"
