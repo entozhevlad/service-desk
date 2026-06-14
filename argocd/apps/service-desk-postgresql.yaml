@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: service-desk-postgresql
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: service-desk
+  source:
+    repoURL: oci://registry-1.docker.io/bitnamicharts
+    chart: postgresql
+    targetRevision: 18.7.3
+    helm:
+      releaseName: service-desk-postgresql
+      values: |
+        auth:
+          database: service_desk
+          username: service_desk
+          password: change-me
+        primary:
+          persistence:
+            size: 2Gi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: service-desk
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
