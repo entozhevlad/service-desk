@@ -1,0 +1,6 @@
+apiVersion: v2
+name: service-desk-sonarqube
+description: SonarQube chart for Service Desk lab static analysis
+type: application
+version: 0.1.0
+appVersion: "10.8-community"

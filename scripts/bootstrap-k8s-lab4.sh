@@ -14,7 +14,8 @@ minikube addons enable metrics-server
 
 echo "==> Installing Argo CD (namespace argocd)"
 kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl apply --server-side --force-conflicts -n argocd -f \
+  https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 kubectl wait --for=condition=available deployment/argocd-server -n argocd --timeout=300s
 
 echo "==> Creating application namespace and backend secret"
@@ -29,6 +30,7 @@ kubectl apply -f "${ROOT_DIR}/argocd/project.yaml"
 kubectl apply -f "${ROOT_DIR}/argocd/root-application.yaml"
 
 echo "==> Waiting for workloads in service-desk"
+kubectl wait --for=condition=available deployment/service-desk-sonarqube -n service-desk --timeout=900s || true
 kubectl wait --for=condition=available deployment/service-desk-backend -n service-desk --timeout=600s || true
 kubectl wait --for=condition=available deployment/service-desk-frontend -n service-desk --timeout=600s || true
 
@@ -42,4 +44,5 @@ kubectl get pods,svc,hpa -n service-desk
 echo
 echo "Frontend:  http://$(minikube ip):30081"
 echo "Grafana:   http://$(minikube ip):30300  (admin / ${GRAFANA_PASSWORD})"
+echo "SonarQube: http://$(minikube ip):30090  (admin / admin on first login)"
 echo "Argo CD UI: kubectl port-forward svc/argocd-server -n argocd 8080:443"
