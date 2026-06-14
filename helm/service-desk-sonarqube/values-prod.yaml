@@ -1,0 +1,16 @@
+service:
+  type: NodePort
+  port: 9000
+  nodePort: 30090
+
+persistence:
+  enabled: true
+  size: 5Gi
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 2Gi
+  limits:
+    cpu: "2"
+    memory: 4Gi

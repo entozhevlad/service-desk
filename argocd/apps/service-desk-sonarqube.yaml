@@ -1,19 +1,22 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: service-desk-root
+  name: service-desk-sonarqube
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   project: service-desk
   source:
     repoURL: https://github.com/entozhevlad/service-desk.git
     targetRevision: lab-4-fix-3
-    path: argocd/apps
-    directory:
-      recurse: true
+    path: helm/service-desk-sonarqube
+    helm:
+      valueFiles:
+        - values-prod.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: service-desk
   syncPolicy:
     automated:
       prune: true

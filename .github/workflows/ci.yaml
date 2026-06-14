@@ -82,7 +82,7 @@ jobs:
   frontend-test:
     name: Frontend - tests
     runs-on: ubuntu-latest
-    needs: [backend-sonar]
+    needs: [backend-build]
     defaults:
       run:
         working-directory: src/frontend
@@ -135,7 +135,7 @@ jobs:
 
   helm-lint:
     runs-on: ubuntu-latest
-    needs: [frontend-sonar]
+    needs: [frontend-build]
     steps:
       - uses: actions/checkout@v4
 
@@ -149,11 +149,12 @@ jobs:
           helm lint helm/service-desk-backend
           helm lint helm/service-desk-frontend
           helm lint helm/service-desk-monitoring
+          helm lint helm/service-desk-sonarqube
 
   backend-sonar:
     name: Backend - SonarQube
     runs-on: ubuntu-latest
-    needs: [backend-build]
+    needs: [backend-tests]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -194,7 +195,7 @@ jobs:
   frontend-sonar:
     name: Frontend - SonarQube
     runs-on: ubuntu-latest
-    needs: [frontend-build]
+    needs: [frontend-test]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -266,7 +267,7 @@ jobs:
   backend-image-publish:
     name: Backend - build and push image
     runs-on: ubuntu-latest
-    needs: [helm-lint]
+    needs: [helm-lint, backend-sonar, frontend-sonar]
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
