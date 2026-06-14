@@ -156,6 +156,8 @@ jobs:
     needs: [backend-build]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Download backend coverage
         uses: actions/download-artifact@v4
@@ -176,6 +178,8 @@ jobs:
             -Dsonar.sources=src/backend/app
             -Dsonar.tests=src/backend/tests
             -Dsonar.python.coverage.reportPaths=src/backend/coverage.xml
+            -Dsonar.python.version=3.12
+            -Dsonar.exclusions=**/__pycache__/**,**/.venv/**,**/migrations/**
             -Dsonar.sourceEncoding=UTF-8
 
       - name: SonarQube quality gate (backend)
@@ -193,6 +197,8 @@ jobs:
     needs: [frontend-build]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Download frontend coverage
         uses: actions/download-artifact@v4
@@ -214,6 +220,7 @@ jobs:
             -Dsonar.tests=src/frontend/src
             -Dsonar.test.inclusions=src/frontend/src/**/*.test.ts,src/frontend/src/**/__tests__/**
             -Dsonar.javascript.lcov.reportPaths=src/frontend/coverage/lcov.info
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/**
             -Dsonar.sourceEncoding=UTF-8
 
       - name: SonarQube quality gate (frontend)

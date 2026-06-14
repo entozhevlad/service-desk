@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: service-desk-frontend
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   project: service-desk
   source:
