@@ -1,0 +1,46 @@
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: sonarqube
+  tag: lts-community
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  port: 9000
+  nodePort: 30090
+
+persistence:
+  enabled: true
+  size: 5Gi
+  storageClassName: ""
+
+env:
+  SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 2Gi
+  limits:
+    cpu: "2"
+    memory: 4Gi
+
+livenessProbe:
+  path: /api/system/status
+  initialDelaySeconds: 120
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 6
+
+readinessProbe:
+  path: /api/system/status
+  initialDelaySeconds: 60
+  periodSeconds: 15
+  timeoutSeconds: 5
+  failureThreshold: 12
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
