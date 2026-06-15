@@ -1,6 +1,6 @@
 image:
   repository: aliquis21/service-desk-frontend
-  tag: 1da99939f792fc9acbb3f78317eff27585a6a3ad
+  tag: 79ef601c4f8e268a0ea3d23c5ec8107c6001ad85
 
 backend:
   serviceName: service-desk-backend
