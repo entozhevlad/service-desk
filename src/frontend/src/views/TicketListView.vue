@@ -140,7 +140,7 @@ const modalTitle = computed(() => (editId.value === null ? "Create ticket" : "Ed
         "
       >
         <div>
-          <h1 class="h1">Mini Service Desk</h1>
+          <h1 class="h1">Mini Service Desk -- С подключением, братья!</h1>
         </div>
 
         <button class="btn btn-primary" @click="openCreate">+ Create ticket</button>
