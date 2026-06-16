@@ -1,6 +1,6 @@
 image:
   repository: docker.io/aliquis21/service-desk-backend
-  tag: c8f94b5c505f3f701e056d9fda17d3e3a8452e75
+  tag: 94989e094e44bcaf1412fd7deb2f90d333c4e5ba
 
 imagePullSecrets: []
 
