@@ -8,19 +8,12 @@ metadata:
 spec:
   project: service-desk
   source:
-    repoURL: oci://registry-1.docker.io/bitnamicharts
-    chart: postgresql
-    targetRevision: 18.7.3
+    repoURL: https://github.com/entozhevlad/service-desk.git
+    targetRevision: lab-4-argocd-fix
+    path: helm/service-desk-postgresql
     helm:
-      releaseName: service-desk-postgresql
-      values: |
-        auth:
-          database: service_desk
-          username: service_desk
-          password: change-me
-        primary:
-          persistence:
-            size: 2Gi
+      valueFiles:
+        - values-prod.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: service-desk

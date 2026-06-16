@@ -7,7 +7,6 @@ spec:
   description: Service Desk applications managed via GitOps
   sourceRepos:
     - https://github.com/entozhevlad/service-desk.git
-    - oci://registry-1.docker.io/bitnamicharts
   destinations:
     - namespace: service-desk
       server: https://kubernetes.default.svc

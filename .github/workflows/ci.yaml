@@ -150,6 +150,7 @@ jobs:
           helm lint helm/service-desk-frontend
           helm lint helm/service-desk-monitoring
           helm lint helm/service-desk-sonarqube
+          helm lint helm/service-desk-postgresql
 
   backend-sonar:
     name: Backend - SonarQube
