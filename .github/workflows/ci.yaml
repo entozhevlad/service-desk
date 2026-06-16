@@ -12,6 +12,7 @@ on:
       - "sonar-project.properties"
       - "README.md"
       - ".github/workflows/ci.yaml"
+      - ".github/actions/**"
   pull_request:
     paths:
       - "src/backend/**"
@@ -22,6 +23,7 @@ on:
       - "sonar-project.properties"
       - "README.md"
       - ".github/workflows/ci.yaml"
+      - ".github/actions/**"
   workflow_dispatch:
 
 permissions:
@@ -74,11 +76,10 @@ jobs:
         if: always()
         continue-on-error: true
         uses: ./.github/actions/telegram-notify
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         with:
           status: ${{ job.status }}
+          telegram-bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          telegram-chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
           job: backend-tests
 
   backend-build:
@@ -94,11 +95,10 @@ jobs:
         if: always()
         continue-on-error: true
         uses: ./.github/actions/telegram-notify
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         with:
           status: ${{ job.status }}
+          telegram-bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          telegram-chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
           job: backend-build
 
   frontend-test:
@@ -135,11 +135,10 @@ jobs:
         if: always()
         continue-on-error: true
         uses: ./.github/actions/telegram-notify
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         with:
           status: ${{ job.status }}
+          telegram-bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          telegram-chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
           job: frontend-test
 
   frontend-build:
@@ -170,11 +169,10 @@ jobs:
         if: always()
         continue-on-error: true
         uses: ./.github/actions/telegram-notify
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         with:
           status: ${{ job.status }}
+          telegram-bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          telegram-chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
           job: frontend-build
 
   helm-lint:
@@ -199,11 +197,10 @@ jobs:
         if: always()
         continue-on-error: true
         uses: ./.github/actions/telegram-notify
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         with:
           status: ${{ job.status }}
+          telegram-bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          telegram-chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
           job: helm-lint
 
   backend-sonar:
@@ -251,11 +248,10 @@ jobs:
         if: always()
         continue-on-error: true
         uses: ./.github/actions/telegram-notify
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         with:
           status: ${{ job.status }}
+          telegram-bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          telegram-chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
           job: backend-sonar
 
   frontend-sonar:
@@ -303,11 +299,10 @@ jobs:
         if: always()
         continue-on-error: true
         uses: ./.github/actions/telegram-notify
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         with:
           status: ${{ job.status }}
+          telegram-bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          telegram-chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
           job: frontend-sonar
 
   backend-lint:
@@ -345,11 +340,10 @@ jobs:
         if: always()
         continue-on-error: true
         uses: ./.github/actions/telegram-notify
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         with:
           status: ${{ job.status }}
+          telegram-bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          telegram-chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
           job: backend-lint
 
   backend-image-publish:
@@ -389,11 +383,10 @@ jobs:
         if: always()
         continue-on-error: true
         uses: ./.github/actions/telegram-notify
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         with:
           status: ${{ job.status }}
+          telegram-bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          telegram-chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
           job: backend-image-publish
 
   frontend-image-publish:
@@ -435,11 +428,10 @@ jobs:
         if: always()
         continue-on-error: true
         uses: ./.github/actions/telegram-notify
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         with:
           status: ${{ job.status }}
+          telegram-bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          telegram-chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
           job: frontend-image-publish
 
   gitops-update:
@@ -478,11 +470,10 @@ jobs:
         if: always()
         continue-on-error: true
         uses: ./.github/actions/telegram-notify
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         with:
           status: ${{ job.status }}
+          telegram-bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          telegram-chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
           job: gitops-update
 
   argocd-deploy:
@@ -526,9 +517,8 @@ jobs:
         if: always()
         continue-on-error: true
         uses: ./.github/actions/telegram-notify
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         with:
           status: ${{ job.status }}
+          telegram-bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          telegram-chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
           job: argocd-deploy
