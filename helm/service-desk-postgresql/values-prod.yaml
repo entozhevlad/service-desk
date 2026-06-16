@@ -1,0 +1,9 @@
+postgresql:
+  auth:
+    database: service_desk
+    username: service_desk
+    password: change-me
+  primary:
+    persistence:
+      enabled: true
+      size: 2Gi
