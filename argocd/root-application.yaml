@@ -7,7 +7,7 @@ spec:
   project: service-desk
   source:
     repoURL: https://github.com/entozhevlad/service-desk.git
-    targetRevision: lab-4-argocd-fix
+    targetRevision: main
     path: argocd/apps
     directory:
       recurse: true
