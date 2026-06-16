@@ -1,0 +1,46 @@
+name: Telegram job notification
+description: Send CI job status to Telegram
+
+inputs:
+  status:
+    description: Job status (success|failure|cancelled|skipped)
+    required: true
+  job:
+    description: Job identifier shown in the message
+    required: true
+  telegram-bot-token:
+    description: Telegram bot token
+    required: true
+  telegram-chat-id:
+    description: Telegram chat id
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        version: latest
+        enable-cache: true
+
+    - name: Send Telegram notification
+      shell: bash
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ inputs.telegram-bot-token }}
+        TELEGRAM_CHAT_ID: ${{ inputs.telegram-chat-id }}
+        GITHUB_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        set -euo pipefail
+        uv sync --project alerts --python 3.12
+        uv run --project alerts --python 3.12 python alerts/telegram_notifier.py \
+          --status "${{ inputs.status }}" \
+          --job "${{ inputs.job }}" \
+          --run-url "${GITHUB_RUN_URL}"
